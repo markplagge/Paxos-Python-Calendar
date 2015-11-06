@@ -1,8 +1,9 @@
-import queue
+﻿import queue
 import asyncio
 import threading
-from simplenetwork import *
-
+import unittest
+import calendar
+import LogParser
 x = queue.Queue()
 
 class test(object):
@@ -32,20 +33,36 @@ def getInput():
         yield from asyncio.sleep(2)
 
 ## use this to stop TCP timeout waits:
-try:
-    #Servers.startupThreadedServers()
-    loop = asyncio.get_event_loop()
-    thread = threading.Thread()
-    #coro = loop.call_soon_threadsafe(loop.run_in_executor,thread,Servers.startupServers)
-    #loop.call_soon(Servers.startupServers)
-    tcpserver = Servers.startupServers()
-    loop.run_until_complete(getInput())
+#try:
+#    #Servers.startupThreadedServers()
+#    loop = asyncio.get_event_loop()
+#    thread = threading.Thread()
+#    #coro = loop.call_soon_threadsafe(loop.run_in_executor,thread,Servers.startupServers)
+#    #loop.call_soon(Servers.startupServers)
+#    tcpserver = Servers.startupServers()
+#    loop.run_until_complete(getInput())
 
-    loop.run_until_complete(tcpserver)
-
-
-    #asyncio.ensure_future(coro)
+#    loop.run_until_complete(tcpserver)
 
 
-except KeyboardInterrupt:
-    Servers.closeServers()
+#    #asyncio.ensure_future(coro)
+
+
+#except KeyboardInterrupt:
+#    Servers.closeServers()
+
+
+class TestCalEvents(unittest.TestCase):
+    def testEQ(self):
+        x = calendar.UserCal.Calendar(158)
+        evt1 = calendar.UserCal.CalEvent()
+        evt2 = evt1.clone()
+        assert (evt1 == evt2)
+
+class TestLogParser(unittest.TestCase):
+    def setUp(self):
+        self.logger = LogParser.LogE(fileName = "testMe.csv",userID="BobbyTest")
+
+    def testAdd(self):
+        x = calendar.UserCal.CalEvent()
+        self.logger.addAppend(x)
