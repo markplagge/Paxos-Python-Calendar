@@ -66,3 +66,6 @@ class TestLogParser(unittest.TestCase):
     def testAdd(self):
         x = calendar.UserCal.CalEvent()
         self.logger.addAppend(x)
+        print(self.logger.generateCal())
+        print("Completed testAdd")
+        return True

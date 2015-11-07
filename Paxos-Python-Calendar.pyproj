@@ -23,6 +23,9 @@
   <ItemGroup>
     <Compile Include="calendar\UserCal.py" />
     <Compile Include="calendar\__init__.py" />
+    <Compile Include="LogParser.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="server_test.py" />
     <Compile Include="simplenetwork\serverData.py" />
     <Compile Include="simplenetwork\Servers.py" />
