@@ -1,0 +1,10 @@
+{
+    "caltxts": [
+        "{\n  \"endTS\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"eventName\": \"DELETE ENTRY TEST\",\n  \"insertTime\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"owner\": \"Nobody\",\n  \"participants\": [],\n  \"startTS\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"uRank\": \"Nope\",\n  \"uid\": -1\n}",
+        "{\n  \"endTS\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"eventName\": \"not a real eventName\",\n  \"insertTime\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"owner\": \"Nobody\",\n  \"participants\": [],\n  \"startTS\": [\n    2015,\n    11,\n    9,\n    18,\n    28,\n    16\n  ],\n  \"uRank\": \"Nope\",\n  \"uid\": -1\n}"
+    ],
+    "fileName": "BobbyTest_caldata",
+    "hrfn": "hum_BobbyTest_caldata.json",
+    "mrfn": "dat_BobbyTest_caldata.dat",
+    "myUID": "BobbyTest"
+}

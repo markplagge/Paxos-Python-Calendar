@@ -26,6 +26,12 @@
     <Compile Include="LogParser.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Paxos\paxosObjs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Paxos\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="server_test.py" />
     <Compile Include="simplenetwork\serverData.py" />
     <Compile Include="simplenetwork\Servers.py" />
@@ -35,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="calendar" />
+    <Folder Include="Paxos\" />
     <Folder Include="simplenetwork" />
   </ItemGroup>
   <ItemGroup>

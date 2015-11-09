@@ -68,4 +68,33 @@ class TestLogParser(unittest.TestCase):
         self.logger.addAppend(x)
         print(self.logger.generateCal())
         print("Completed testAdd")
+        
         return True
+    def testDel(self):
+        x = calendar.UserCal.CalEvent(eventName="DELETE ENTRY TEST")
+        
+        uid = self.logger.addAppend(x)
+        cal = self.logger.generateCal()
+        isT = False
+        print(cal)
+        self.logger.addDelete(cal.cal[0], uid)
+        print(self.logger.generateCal())
+"""
+class TestCalEvents(unittest.TestCase):
+    def testEQ(self):
+        x = calendar.UserCal.Calendar(158)
+        evt1 = calendar.UserCal.CalEvent()
+        evt2 = evt1.clone()
+        assert (evt1 == evt2)
+
+class TestLogParser(unittest.TestCase):
+    def setUp(self):
+        self.logger = LogParser.LogE(fileName = "testMe.csv",userID="BobbyTest")
+
+    def testAdd(self):
+        x = calendar.UserCal.CalEvent()
+        self.logger.addAppend(x)
+        print(self.logger.generateCal())
+        print("Completed testAdd")
+        return True
+"""

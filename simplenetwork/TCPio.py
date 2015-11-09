@@ -1,6 +1,7 @@
-from simplenetwork import serverData
+﻿from simplenetwork import serverData
 import asyncio
 import socket
+sq = serverData.mainServerQueue
 
 ### TCP Servers:
 clients = []

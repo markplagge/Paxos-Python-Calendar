@@ -47,7 +47,7 @@ class CalEvent(object):
         return self.uid
     
     @property
-    def eventRange(self):
+    def eventRange(self):        
         return busyT(start=self.startTS, end=self.endTS)
 
     def __str__(self):
@@ -58,7 +58,7 @@ class CalEvent(object):
         owner = 'Owner: ' + str(self.owner) + ', '
         parts = 'Participants: ' + str(self.participants) +', '
         insert = 'Insert Time: ' + str(self.insertTime)
-        return   title + start + end + priority + owner + parts + insert
+        return   title + start + end +  owner + parts + insert
     def clone(self):
         return copy.deepcopy(self)
 
@@ -181,8 +181,10 @@ class Calendar(object):
         return False
 
     def __str__(self, **kwargs):
-        strout = "Calendar for %s:\n"+ str(self.myUID)
-        strout += map(lambda evt: str(evt) + "\n", self.cal)
+        strout = "Calendar for "+ str(self.myUID) + ":\n"
+        for e in self.cal:
+            strout += str(e) + "\n"
+        #strout += str(list(map(lambda evt: str(evt) + "\n", self.cal)))
         return strout
 
 
@@ -281,6 +283,10 @@ class Calendar(object):
 #########FACTORY FOR FILE/IO #####
 # Factory Pattern for init from JSON or File:
 # Note: Actual class may not include any factory pattern.
+def genCalEvt(text):
+    cc = CalEvent()
+    cc.fromJSON(text)
+    return cc
 
 class CalGenerator(object):
     def __init__(self, source="FILE", type="JSON", fileName="", stream="", uuid=""):
