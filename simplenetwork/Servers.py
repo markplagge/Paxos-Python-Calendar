@@ -16,8 +16,11 @@ coro = ""
 
 def startupThreadedServers():
     print("Starting up network stack")
-    udpServer = UDPio.thUDPHandler((myIP, udpPort),UDPio.thUDPHandler)
-    threads.append( threading.Thread(target=udpServer.serve_forever))
+    #udpServer = UDPio.thUDPHandler((myIP, udpPort),UDPio.thUDPHandler)
+    #udpServer = server = socketserver.ThreadingUDPServer()
+    #ip,port = udpServer.server_address
+    #threads.append( threading.Thread(target=udpServer.serve_forever))
+    threads.append(threading.Thread(target=UDPio.udpRun))
     threads.append( threading.Thread(target=UDPio.udpSendData))
     running = True
     for t in threads:
@@ -51,5 +54,11 @@ def closeServers():
 
 if __name__ == '__main__':
     if not running:
+        udpDests.append(("127.0.0.1",7777))
         startupServers()
-        sq.outUDP.put("TESTER!@!")
+        try:
+            while  True:
+                data = input("Press enter to send:")
+                sq.outUDP.put(data)
+        except:
+            print("closing")

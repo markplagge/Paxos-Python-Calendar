@@ -10,7 +10,7 @@ class serverData(object):
 mainServerQueue = serverData()
 
 tcpDests= {}
-udpDests= {}
+udpDests= []
 
 udpPort = 7777
 tcpPort = 8888

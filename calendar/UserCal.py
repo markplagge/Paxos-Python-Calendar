@@ -164,7 +164,7 @@ class CalEvent(object):
 
 class Calendar(object):
     
-    def __init__(self, username=0):
+    def __init__(self, username=0, stateless=False):
         if (username != ""):
             self.myUID = username
             self.fileName = str(self.myUID) + "_caldata"
@@ -172,6 +172,7 @@ class Calendar(object):
             self.mrfn = "dat_" + str(self.myUID) + "_caldata.dat"
             self.cal = []
             self.caltxts = []
+            self.stateless=stateless
 
 
     def __eq__(self, other):
@@ -263,14 +264,16 @@ class Calendar(object):
         if isinstance(calevt,str):
             calevt = genCalEvt(calevt)
         result = self.addEntry(calevt)
-        self.saveCal()
+        if not self.stateless:
+            self.saveCal()
         return result
 
     def deleteEvent(self, calevt):
         if isinstance(calevt,str):
             calevt = genCalEvt(calevt)
         result = self.removeEntry(calevt)
-        self.saveCal()
+        if not self.stateless:
+            self.saveCal()
         return result
 
     def hasEvent(self,evt):
