@@ -1,2 +1,2 @@
-import collections, Paxos.paxosObjs
+import collections, paxos.paxosObjs
 pUID = collections.namedtuple('PID', ['myPN', 'uid'])

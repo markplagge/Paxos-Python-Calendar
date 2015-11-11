@@ -1,15 +1,16 @@
 ﻿import numpy
-import calendar
+import pCalendar
 import os
 import jsonpickle
 import csv
 import random
-import Paxos
+import paxos
 class LogE(object):
     """description of class"""
-    """The idea here being that every time we view a calendar, the log file is used. No in-memory calendar."""
+    """The idea here being that every time we view a pCalendar, the log file is used. No in-memory pCalendar."""
     fieldNames = ['uid','command', 'data']
-    def __init__(self, fileName=None, fileObj=None, userID = 0):
+    def __init__(self, fileName=None, fileObj=None, userID = 0, stateless=False):
+        self.stateless = stateless
         self.cd = csv.register_dialect("cd",delimiter=":", quoting=csv.QUOTE_MINIMAL,doublequote=True)
         if fileName == None:
             if fileObj is None:
@@ -44,9 +45,14 @@ class LogE(object):
             #cmds = cmds[0]
         
             
-        return cmds 
-    def __loadLog(self, f = None):  
-        if f is None:
+        return cmds
+    def __loadLogFromText(self,text):
+        pass
+
+    def __loadLog(self, f = None):
+        if self.stateless:
+            print("Stateless not done.")
+        elif f is None:
             return self.__loadLogFromFile()
         else:
             self.fileObj = f
@@ -80,7 +86,7 @@ class LogE(object):
     #Tuple (actually a np.array) vals: "CMD","JSON_INDIVIDUAL_EVT".
     def generateCal(self):
         commands = {}
-        cal = calendar.UserCal.Calendar(self.userID)
+        cal = pCalendar.UserCal.Calendar(self.userID)
         cmds = self.__loadLog()
         if len(cmds) > 0:
              cals = list(set(cmds))
@@ -107,7 +113,7 @@ class LogE(object):
 
 
     def __createLogWithCal(self,entryType, calEVT, uid):
-        assert(calEVT,calendar.UserCal.CalEvent)
+        assert(calEVT, pCalendar.UserCal.CalEvent)
         js = calEVT.toJSON()
         entry = (uid,entryType, js)
         return entry

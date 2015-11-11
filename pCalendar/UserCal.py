@@ -59,6 +59,11 @@ class CalEvent(object):
         parts = 'Participants: ' + str(self.participants) +', '
         insert = 'Insert Time: ' + str(self.insertTime)
         return   title + start + end +  owner + parts + insert
+
+    def listFormat(self):
+        return [str(self.uid), str(self.startTS),str(self.endTS),str(self.participants)]
+
+
     def clone(self):
         return copy.deepcopy(self)
 
@@ -164,7 +169,7 @@ class CalEvent(object):
 
 class Calendar(object):
     
-    def __init__(self, username=0, stateless=False):
+    def __init__(self, username=0, stateless=True):
         if (username != ""):
             self.myUID = username
             self.fileName = str(self.myUID) + "_caldata"

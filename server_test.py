@@ -2,7 +2,7 @@
 import asyncio
 import threading
 import unittest
-import calendar
+import pCalendar
 import LogParser
 x = queue.Queue()
 
@@ -54,8 +54,8 @@ def getInput():
 
 class TestCalEvents(unittest.TestCase):
     def testEQ(self):
-        x = calendar.UserCal.Calendar(158)
-        evt1 = calendar.UserCal.CalEvent()
+        x = pCalendar.UserCal.Calendar(158)
+        evt1 = pCalendar.UserCal.CalEvent()
         evt2 = evt1.clone()
         assert (evt1 == evt2)
 
@@ -64,14 +64,14 @@ class TestLogParser(unittest.TestCase):
         self.logger = LogParser.LogE(fileName = "testMe.csv",userID="BobbyTest")
 
     def testAdd(self):
-        x = calendar.UserCal.CalEvent()
+        x = pCalendar.UserCal.CalEvent()
         self.logger.addAppend(x)
         print(self.logger.generateCal())
         print("Completed testAdd")
         
         return True
     def testDel(self):
-        x = calendar.UserCal.CalEvent(eventName="DELETE ENTRY TEST")
+        x = pCalendar.UserCal.CalEvent(eventName="DELETE ENTRY TEST")
         
         uid = self.logger.addAppend(x)
         cal = self.logger.generateCal()
@@ -82,8 +82,8 @@ class TestLogParser(unittest.TestCase):
 """
 class TestCalEvents(unittest.TestCase):
     def testEQ(self):
-        x = calendar.UserCal.Calendar(158)
-        evt1 = calendar.UserCal.CalEvent()
+        x = pCalendar.UserCal.Calendar(158)
+        evt1 = pCalendar.UserCal.CalEvent()
         evt2 = evt1.clone()
         assert (evt1 == evt2)
 
@@ -92,7 +92,7 @@ class TestLogParser(unittest.TestCase):
         self.logger = LogParser.LogE(fileName = "testMe.csv",userID="BobbyTest")
 
     def testAdd(self):
-        x = calendar.UserCal.CalEvent()
+        x = pCalendar.UserCal.CalEvent()
         self.logger.addAppend(x)
         print(self.logger.generateCal())
         print("Completed testAdd")
