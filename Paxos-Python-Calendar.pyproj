@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{08e5e0cb-7b63-4740-9719-094adda34168}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>server_test.py</StartupFile>
+    <StartupFile>leader\Leader.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,17 +21,25 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="calendar\UserCal.py" />
-    <Compile Include="calendar\__init__.py" />
+    <Compile Include="Client\ClientLog.py" />
+    <Compile Include="Client\UI.py" />
+    <Compile Include="Client\__init__.py" />
+    <Compile Include="leader\Leader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="leader\__init__.py" />
     <Compile Include="LogParser.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="npscUITester.py" />
     <Compile Include="Paxos\paxosObjs.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Paxos\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="pCalendar\UserCal.py" />
+    <Compile Include="pCalendar\__init__.py" />
     <Compile Include="server_test.py" />
     <Compile Include="simplenetwork\serverData.py" />
     <Compile Include="simplenetwork\Servers.py" />
@@ -40,12 +48,18 @@
     <Compile Include="simplenetwork\__init__.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="calendar" />
+    <Folder Include="Client\" />
+    <Folder Include="leader\" />
     <Folder Include="Paxos\" />
+    <Folder Include="pCalendar\" />
+    <Folder Include="pCalendar\__pycache__\" />
     <Folder Include="simplenetwork" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="pCalendar\__pycache__\UserCal.cpython-34.pyc.66575680" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />

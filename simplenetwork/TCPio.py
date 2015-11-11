@@ -28,24 +28,30 @@ def sendTCPAll(loop):
     while True:
         while sq.outTCP.qsize() > 0:
             print("Sending a message")
-
-            message_dests = serverData.getDests()
             msg = sq.outTCP.get()
-            message_dests[str(msg.destID)][1].append(msg)
-            for dest in message_dests:
-                # print("INDIVID DST:", dest)
-                if len(message_dests[str(dest)]) is 0:
-                    pass
-                else:
-                    # print(str(message_dests[str(dest)][0]))
+            if isinstance(msg, tuple):
+                message = msg[0]
+                destIP = msg[1]
+                destPort = serverData.tcpPort
+                yield from threadWriter([destIP,destPort],message,loop)
+            else:
+                message_dests = serverData.getDests()
+           
+                message_dests[str(msg.destID)][1].append(msg)
+                for dest in message_dests:
+                    # print("INDIVID DST:", dest)
+                    if len(message_dests[str(dest)]) is 0:
+                        pass
+                    else:
+                        # print(str(message_dests[str(dest)][0]))
 
-                    #reader,writer = yield  from asyncio.open_connection(deststr,                        loop=loop)
+                        #reader,writer = yield  from asyncio.open_connection(deststr,                        loop=loop)
 
-                    #
+                        #
 
-                    # print("DEESSST TEST", dest)
-                    for mess in message_dests[str(dest)][1]:
-                        yield from threadWriter(message_dests[str(dest)][0],mess,loop)
+                        # print("DEESSST TEST", dest)
+                        for mess in message_dests[str(dest)][1]:
+                            yield from threadWriter(message_dests[str(dest)][0],mess,loop)
         yield  from asyncio.sleep(1)
 @asyncio.coroutine
 def threadWriter(host, message,Loop):
