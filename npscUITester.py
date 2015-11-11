@@ -127,7 +127,7 @@ def createCal(myCal):
     event = pCalendar.UserCal.CalEvent(title,start,end,myCal.myUID,participants=parts,owner=myCal.myUID)
 
 
-    return F,event
+    return event
     #ce = pCalendar.UserCal.CalEvent(eventName = F.evenTitle, startTS=datetime.datetime.now(), endTS=datetime.datetime.now(),
     #             uid=-1, uRank="Nope", participants=[],
     #             insertTime=datetime.datetime.now(), owner="Nobody"):)
@@ -145,7 +145,7 @@ selected = None
 
 
 
-def main(*args):
+def main(*args, **keywords):
 
 
     uid = 102
@@ -154,18 +154,18 @@ def main(*args):
     #F.edit()
     m = npyscreen.Form()
     dtm = None
-    try:
-        F,dtm = createCal(x)
+    #try:
+    dtm = createCal(x)
 
-        if(x.canAdd(curCalEvent)):
-            m.add(npyscreen.notify_confirm("Event created, no local conflicts detected"))
-        else:
-            m.add(npyscreen.notify_confirm("Ecent created, but a local conflict was found"))
-    except:
-        m.add(npyscreen.notify_confirm("Sorry, invalid calendar"))
+        #if(x.canAdd(curCalEvent)):
+        #    m.add(npyscreen.notify_confirm("Event created, no local conflicts detected"))
+        #else:
+        #    m.add(npyscreen.notify_confirm("Event created, but a local conflict was found"))
+    #except:
+    #    m.add(npyscreen.notify_confirm("Sorry, invalid calendar"))
 
-    finally:
-        m.display()
+    #finally:
+    #    m.display()
     #print("Created event for user " + F.evenTitle.value)
     #print(dtm)
     #urwid.MainLoop(top, palette=[('reversed', 'standout', '')]).run()
@@ -185,9 +185,14 @@ def main(*args):
     #print(x)
     return dtm
 
+def displayCal(cal):
+    print("Current Calendar:")
+    print(cal)
 
 if __name__ == '__main__':
-    print(npyscreen.wrapper_basic(main))
+    cal = npyscreen.wrapper_basic(main)
+    print(cal)
+    x.addEntry(cal)
     print(x)
     #myApp = CalendarApplication()
     #myApp.run()
