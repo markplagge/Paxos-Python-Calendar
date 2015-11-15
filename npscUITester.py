@@ -103,8 +103,38 @@ class newCalEvent(npyscreen.FormMultiPageAction):
         #self.parentApp.switchFormNow()
         #self.parentApp.setNextForm(displayCalendar)
 
+class MyGrid(npyscreen.GridColTitles):
+    # You need to override custom_print_cell to manipulate how
+    # a cell is printed. In this example we change the color of the
+    # text depending on the string value of cell.
+    def custom_print_cell(self, actual_cell, cell_display_value):
+        if cell_display_value =='FAIL':
+           actual_cell.color = 'DANGER'
+        elif cell_display_value == 'PASS':
+           actual_cell.color = 'GOOD'
+        else:
+           actual_cell.color = 'DEFAULT'
+class mainMenu(npyscreen.FormMultiPage):
 
+    def create(self):
+        super(mainMenu, self).create()
+        #Show calendar here
+        self.add(npyscreen.FixedText, value=x.__str__())
 
+        self.option = ""
+        self.addB = self.add(npyscreen.ButtonPress,name="Add",when_pressed_function=self.addItem)
+        self.delB = self.add(npyscreen.ButtonPress,name="Delete ",when_pressed_function=self.delBp)
+        self.endB = self.add(npyscreen.ButtonPress,name="end",when_pressed_function=self.endBp)
+
+    def addItem(self):
+        self.option = "add"
+        self.editing = False
+    def delBp(self):
+        self.option = "del"
+        self.editing = False
+    def endBp(self):
+        self.option = "end"
+        self.editing = False
 
 def createCal(myCal):
     F = newCalEvent(name="Add Event" )
@@ -147,15 +177,34 @@ selected = None
 
 def main(*args, **keywords):
 
-
+    dtm = None
     uid = 102
     #createCal(x)
-    F = newCalEvent(name="Add Event", uid = 102 )
+    opt = "go"
+    g = mainMenu()
+    while opt != "end":
+
+        if g.option == "add":
+            F = newCalEvent(name="Add Event", uid = 102 )
+            dtm = createCal(x)
+            x.addEntry(dtm)
+            g = mainMenu()
+        if g.option == "end":
+            break
+        if g.option =="del":
+            mm = npyscreen.Form(name="Delete Event")
+            mm.add(npyscreen.Textfield, name="Enter Event Number")
+            mm.edit()
+            g = mainMenu()
+        g.edit()
+        opt = g.option
+        g.DISPLAY()
+
     #F.edit()
     m = npyscreen.Form()
-    dtm = None
+    #
     #try:
-    dtm = createCal(x)
+
 
         #if(x.canAdd(curCalEvent)):
         #    m.add(npyscreen.notify_confirm("Event created, no local conflicts detected"))
