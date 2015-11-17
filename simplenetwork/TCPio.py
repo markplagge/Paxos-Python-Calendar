@@ -1,10 +1,14 @@
 ﻿from simplenetwork import serverData
 import asyncio
-import socket
+try:
+    from socket import socketpair
+except ImportError:
+    from asyncio.windows_utils import socketpair
 sq = serverData.mainServerQueue
 
 ### TCP Servers:
 clients = []
+lostClients = asyncio.Queue()
 class TCPServerProtocol(asyncio.Protocol):
 
     def connection_made(self,transport):
@@ -17,6 +21,7 @@ class TCPServerProtocol(asyncio.Protocol):
 
     def connection_lost(self, exc):
         print("Connection lost to a process")
+        lostClients.put(self)
         clients.remove(self)
 
 
@@ -26,6 +31,7 @@ class TCPServerProtocol(asyncio.Protocol):
 @asyncio.coroutine
 def sendTCPAll(loop):
     while True:
+        
         while sq.outTCP.qsize() > 0:
             print("Sending a message")
             msg = sq.outTCP.get()
@@ -43,7 +49,7 @@ def sendTCPAll(loop):
                     if len(message_dests[str(dest)]) is 0:
                         pass
                     else:
-                        # print(str(message_dests[str(dest)][0]))
+                        #print(str(message_dests[str(dest)][0]))
 
                         #reader,writer = yield  from asyncio.open_connection(deststr,                        loop=loop)
 

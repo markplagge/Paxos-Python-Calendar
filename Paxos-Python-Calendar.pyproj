@@ -11,8 +11,8 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
-    <InterpreterVersion>3.4</InterpreterVersion>
+    <InterpreterId>{b9c3ed03-6153-477c-89fa-51f0c29cbd9f}</InterpreterId>
+    <InterpreterVersion>3.5</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -21,9 +21,15 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="clientTest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Client\ClientLog.py" />
     <Compile Include="Client\UI.py" />
     <Compile Include="Client\__init__.py" />
+    <Compile Include="leadershipTest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="leader\Leader.py">
       <SubType>Code</SubType>
     </Compile>
@@ -56,7 +62,7 @@
     <Folder Include="simplenetwork" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
+    <InterpreterReference Include="{b9c3ed03-6153-477c-89fa-51f0c29cbd9f}\3.5" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="pCalendar\__pycache__\UserCal.cpython-34.pyc.66575680" />
