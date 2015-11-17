@@ -9,6 +9,7 @@ sq = serverData.mainServerQueue
 ### TCP Servers:
 clients = []
 lostClients = asyncio.Queue()
+leaderEvt = None
 class TCPServerProtocol(asyncio.Protocol):
 
     def connection_made(self,transport):
@@ -23,6 +24,8 @@ class TCPServerProtocol(asyncio.Protocol):
         print("Connection lost to a process")
         lostClients.put(self)
         clients.remove(self)
+        if leaderEvt is not None:
+            leaderEvt.set()
 
 
 

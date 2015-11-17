@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{08e5e0cb-7b63-4740-9719-094adda34168}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>leader\Leader.py</StartupFile>
+    <StartupFile>paxos.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -38,6 +38,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="npscUITester.py" />
+    <Compile Include="paxos.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Paxos\paxosObjs.py">
       <SubType>Code</SubType>
     </Compile>
