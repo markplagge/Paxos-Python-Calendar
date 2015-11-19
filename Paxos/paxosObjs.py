@@ -1,4 +1,5 @@
 ﻿import collections
+import threading
 class pMessenger(object):
     """Represents the messengers"""
     def send_prepare(self, proposal_id):
@@ -15,10 +16,10 @@ class pMessenger(object):
     def on_resolution(self, proposal_id, value):
         pass
 
-class pLearner(object):
+class pLearner(threading.Thread):
     """Represents the learner object -saves log to disk"""
     pass
 
-class pAcceptor(object):
+class pAcceptor(threading.Thread):
     """The paxos acceptor"""
     pass

@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>{b9c3ed03-6153-477c-89fa-51f0c29cbd9f}</InterpreterId>
+    <InterpreterId>{93d1a166-2556-4a78-9b19-25d3d0b653fb}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -65,7 +65,7 @@
     <Folder Include="simplenetwork" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="{b9c3ed03-6153-477c-89fa-51f0c29cbd9f}\3.5" />
+    <InterpreterReference Include="{93d1a166-2556-4a78-9b19-25d3d0b653fb}\3.5" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="pCalendar\__pycache__\UserCal.cpython-34.pyc.66575680" />
