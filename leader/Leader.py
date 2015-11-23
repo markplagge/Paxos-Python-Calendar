@@ -148,7 +148,7 @@ class Leader(threading.Thread):
         self.inMessages = []
         self.myIP = myIP
         self.myPort = myPort
-        
+        self.isLeader = True
         self.clIP = "127.0.0.1"
         self.clP = 7777
         self.live = ""

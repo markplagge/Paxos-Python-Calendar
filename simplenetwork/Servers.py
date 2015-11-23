@@ -1,12 +1,19 @@
-import socketserver
+﻿import socketserver
 import asyncio
 import socket
 import threading
 import simplenetwork.serverData
-from simplenetwork.serverData import tcpDests,tcpPort,udpDests,udpPort,myIP
+from simplenetwork.serverData import udpDests,udpPort,myIP
 from simplenetwork import TCPio, UDPio
 from simplenetwork.serverData import mainServerQueue as sq
+try:
+    from socket import socketpair
+except ImportError:
+    from asyncio.windows_utils import socketpair
 
+
+tcpPort = simplenetwork.serverData.tcpPort
+udpPort = simplenetwork.serverData.udpPort
 
 
 running = False
@@ -20,28 +27,44 @@ def startupThreadedServers():
     #udpServer = server = socketserver.ThreadingUDPServer()
     #ip,port = udpServer.server_address
     #threads.append( threading.Thread(target=udpServer.serve_forever))
-    threads.append(threading.Thread(target=UDPio.udpRun))
-    threads.append( threading.Thread(target=UDPio.udpSendData))
+
+    srvr, sender = UDPio.runUDP()
     running = True
-    for t in threads:
-        assert(isinstance(t, threading.Thread))
-        t.start()
     simplenetwork.UDPio.running = True
+    simplenetwork.UDPio.sndrRun = True
+    threads.append(srvr)
+    threads.append(sender)
     print("threads init")
 
 
 def startupServers():
     startupThreadedServers()
     loop = asyncio.get_event_loop()
-    coro = loop.create_server(TCPio.TCPServerProtocol, port=tcpPort)
+   
+    #coro = loop.create_connection(TCPio.TCPServerProtocol,local_addr=("127.0.0.1",simplenetwork.serverData.tcpPort))
+    #rsock = socket.socket(family=AF_INET)
+    
+    coro = loop.create_server(TCPio.TCPServerShort,host="127.0.0.1",port=simplenetwork.serverData.tcpPort,reuse_address=True)
+    
+    
     return coro
 
-
+def startSender():
+    #loop = asyncio.get_event_loop()
+    #coro = asyncio.ensure_future(TCPio.sendTCPAll(loop))
+    #loop.run_in_executor(executor=None,func=TCPio.sendTCPAll(loop))
+    
+    #loop.run_until_complete(coro)
+    x = threading.Thread(target=TCPio.tcpSendTh)
+    
+    x.start()
+    return x
 
 
 
 def runServer():
     loop = asyncio.get_event_loop()
+    
     tcpServer = loop.run_until_complete(coro)
 
 @asyncio.coroutine

@@ -4,6 +4,11 @@ import threading
 import unittest
 import pCalendar
 import LogParser
+import simplenetwork
+import random
+import time
+import sys
+import concurrent
 x = queue.Queue()
 
 class test(object):
@@ -51,6 +56,23 @@ def getInput():
 #except KeyboardInterrupt:
 #    Servers.closeServers()
 
+def threadwaiter(sent=2):
+    while simplenetwork.serverData.mainServerQueue.inTCP.qsize() < sent:
+        time.sleep(3)
+    while simplenetwork.serverData.mainServerQueue.inUDP.qsize() <sent:
+        time.sleep(3)
+
+
+def serverRun():
+    coro = simplenetwork.Servers.startupServers()
+    loop = asyncio.get_event_loop()
+    
+    tcpServer = loop.run_until_complete(coro)
+    time.sleep(2)
+    simplenetwork.Servers.startSender()
+    #simplenetwork.TCPio.main()
+   
+ 
 
 class TestCalEvents(unittest.TestCase):
     def testEQ(self):
@@ -62,6 +84,11 @@ class TestCalEvents(unittest.TestCase):
 class TestLogParser(unittest.TestCase):
     def setUp(self):
         self.logger = LogParser.LogE(fileName = "testMe.csv",userID="BobbyTest")
+        simplenetwork.serverData.udpDests = ["127.0.0.1"]
+        simplenetwork.serverData.udpPort = random.randint(6000,9000)
+        simplenetwork.serverData.tcpPort = random.randint(2000,5444)
+        simplenetwork.serverData.tcpDests = ["127.0.0.1"]
+        self.qs = simplenetwork.serverData.mainServerQueue
 
     def testAdd(self):
         x = pCalendar.UserCal.CalEvent()
@@ -79,6 +106,59 @@ class TestLogParser(unittest.TestCase):
         print(cal)
         self.logger.addDelete(cal.cal[0], uid)
         print(self.logger.generateCal())
+
+    def testUDPBroadcast(self):
+
+        srv, snd = simplenetwork.UDPio.testUDP()
+        
+        self.qs.outUDP.put("Test Value")
+        
+        while self.qs.inUDP.qsize() < 1:
+            pass
+        assert self.qs.inUDP.get() == "Test Value"
+        srv.shutdown()
+        simplenetwork.UDPio.sndrRun = False
+
+    def testUDPSingle(self):
+        srv, snd = simplenetwork.UDPio.testUDP()
+        self.qs.outUDP.put(("Test Value", "127.0.0.1"))
+        while self.qs.inUDP.qsize() < 1:
+            pass
+        assert self.qs.inUDP.get() == "Test Value"
+        srv.shutdown()
+        simplenetwork.UDPio.sndrRun = False
+    
+    def testServerInit(self):
+        exec = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+        
+        bc = "broadcast test string"
+        sc = "single test string"
+        self.qs.outUDP.put(bc)
+        self.qs.outUDP.put((sc,"127.0.0.1"))
+        self.qs.outTCP.put(bc)
+        self.qs.outTCP.put((sc,"127.0.0.1"))
+        loop = asyncio.get_event_loop()
+        x = threading.Thread(target=threadwaiter)
+        x.start()
+        #v = threading.Thread(target=serverRun)
+        #v.start()
+        loop.run_in_executor(executor = exec,func=serverRun())
+        x.join()
+
+        while self.qs.inTCP.qsize() > 0:
+            ind = self.qs.inTCP.get()
+            assert(ind == bc or ind == sc)
+            print("TCP Data got: " + ind)
+        while self.qs.inUDP.qsize() > 0:
+            ind = self.qs.inUDP.get()
+            assert(ind == bc or ind == sc)
+            print("UDP Data got: " + ind)
+        loop.close()
+        #simplenetwork.Servers.running = False
+        #asyncio.async(simplenetwork.Servers.closeServers)
+        #asyncio.async(simplenetwork.Servers.closeServers())
+
+
 """
 class TestCalEvents(unittest.TestCase):
     def testEQ(self):
@@ -98,3 +178,12 @@ class TestLogParser(unittest.TestCase):
         print("Completed testAdd")
         return True
 """
+
+
+def main():
+    tstr = TestLogParser()
+    tstr.setUp()
+    tstr.testServerInit()
+
+if __name__ == "__main__":
+    sys.exit(int(main() or 0))
