@@ -39,15 +39,19 @@ def startupThreadedServers():
 
 def startupServers():
     startupThreadedServers()
-    loop = asyncio.get_event_loop()
+    #loop = asyncio.get_event_loop()
    
     #coro = loop.create_connection(TCPio.TCPServerProtocol,local_addr=("127.0.0.1",simplenetwork.serverData.tcpPort))
     #rsock = socket.socket(family=AF_INET)
     
-    coro = loop.create_server(TCPio.TCPServerShort,host="127.0.0.1",port=simplenetwork.serverData.tcpPort,reuse_address=True)
+    #coro = loop.create_server(TCPio.TCPServerShort,host="127.0.0.1",port=simplenetwork.serverData.tcpPort,reuse_address=True)
+
+    server = TCPio.thTCPServer(("localhost",simplenetwork.serverData.tcpPort), TCPio.thTCPServerHandler)
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.daemon = True
+    server_thread.start()
     
-    
-    return coro
+    return server
 
 def startSender():
     #loop = asyncio.get_event_loop()
@@ -56,16 +60,13 @@ def startSender():
     
     #loop.run_until_complete(coro)
     x = threading.Thread(target=TCPio.tcpSendTh)
-    
+    #x = threading.Thread(target=TCPio.tcpSendThPersist)
     x.start()
     return x
 
 
 
-def runServer():
-    loop = asyncio.get_event_loop()
-    
-    tcpServer = loop.run_until_complete(coro)
+
 
 @asyncio.coroutine
 def closeServers():

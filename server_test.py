@@ -65,11 +65,13 @@ def threadwaiter(sent=2):
 
 def serverRun():
     coro = simplenetwork.Servers.startupServers()
-    loop = asyncio.get_event_loop()
+    #loop = asyncio.get_event_loop()
     
-    tcpServer = loop.run_until_complete(coro)
+    #tcpServer = loop.run_until_complete(coro)
     time.sleep(2)
     simplenetwork.Servers.startSender()
+    time.sleep(10)
+    coro.shutdown()
     #simplenetwork.TCPio.main()
    
  

@@ -16,14 +16,27 @@ sq = serverData.mainServerQueue
 clients = []
 lostClients = asyncio.Queue()
 leaderEvt = None
+## Threaded TCP Server
+def server():
 
-class thTCPServer(socketserver.BaseRequestHandler):
+    sct = socket.socket()
+    sct.bind("localhost", serverData.tcpPort)
+
+
+
+class thTCPServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         
-        data = self.request.recv(1024)
+        data = self.request.recv(10000).decode()
         cur_thread = threading.current_thread()
         serverData.mainServerQueue.inTCP.put(data)
         print("TCP Rcvd data: " + str(data))
+class thTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
+
+
+
 @asyncio.coroutine
 def TCPServerShort(reader,writer):
     data = yield from reader.read(100000)
@@ -116,8 +129,9 @@ def main():
         print('Closing connection')
     loop.close()
 ##TCP Clients (send data):
-def lostTCPConnection():
+def lostTCPConnection(data):
     print("LOST A TCP CONNECTION TO SERVER")
+    sq.outTCP.put(data)
     
 def tcpSendTh():
     if(sq.outTCP.qsize() > 0):
@@ -130,19 +144,48 @@ def tcpSendTh():
                 sock.connect((dest,serverData.tcpPort))
                 sock.send(data.encode())
             except:
-                lostTCPConnection()
+                lostTCPConnection(msg)
         else:
             ##broadcast
             for dest in serverData.tcpDests:
                 sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
                 try:
                     sock.connect((dest,serverData.tcpPort))
+                    sock.send(msg.encode())
+                except:
+                    lostTCPConnection(msg)
+    threading.Timer(1.5,tcpSendTh).start()
+def sender(sock, message):
+    try:
+        sock.send(message.encode())
+    except:
+        lostTCPConnection(message)
+
+def tcpSendThPersist():
+    clients = {}
+    for dest in serverData.tcpDests:
+        sock = socket.socket()
+        sock.connect((dest,serverData.tcpPort))
+        clients[dest] = sock
+
+    while True:
+        if(sq.outTCP.qsize() > 0):
+            msg = sq.outTCP.get()
+            if isinstance(msg,tuple):
+                dest = msg[1]
+                data = msg[0]
+                try:
+                    sock = clients[dest]
+
                     sock.send(data.encode())
                 except:
-                    lostTCPConnection()
-    threading.Timer(1.5,tcpSendTh).start()
+                    lostTCPConnection(data)
+            else:
+                for sock in clients:
+                    threading.Thread(target=sender,args=(sock,msg))
 
-            
+
+
 
 
 
