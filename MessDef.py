@@ -7,7 +7,16 @@ class NetMess(object):
         self.accNum = accNum
         self.accVal = accVal
         self.recipient = recipient
-        self.sender = sender 
+        self.sender = sender
+
+    def isSenderEqual(self,other):
+        assert(isinstance(other,NetMess))
+        return self.sender == other.sender
+
+    def pickleMe(self):
+        return ("THIS SHOULD BE PICKLED BUT IT IS NOT")
+
+
 
 
 
