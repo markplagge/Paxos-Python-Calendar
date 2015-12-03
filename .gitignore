@@ -3,3 +3,7 @@
 *.pyc
 
 *.pyc
+
+*.pyc
+
+simplenetwork/__pycache__/TCPio.cpython-35.pyc
