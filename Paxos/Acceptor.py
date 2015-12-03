@@ -13,11 +13,12 @@ acceptorOut = queue.Queue()
 
 
 
-
+''
 
 class Acceptor(threading.Thread):
     """represents an accecptor in Paxos. Is threaded."""
-    def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = leader.Leader(), thisIP=None):
+    def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = leader.Leader.Leader(), thisIP=None):
+        super().__init__()
         self.daemon = daemon
         self.outQ = outQ
         self.inQ = inQ
@@ -34,7 +35,7 @@ class Acceptor(threading.Thread):
 
         self.learner = Learner()
 
-        super().__init__()
+
 
 
     #### MESSAGE PARSING / TYPING ###
@@ -157,14 +158,14 @@ class Acceptor(threading.Thread):
                 #we have a message - let's deal with it:
                 message = self.extractMessage(self.inQ.get())
                 cases[message.messType](message)
-                
+
 
 
 class Learner(object):
     """
     A basic learner class - is actually attached to an Acceptor
     """
-    self.cal = None
+    cal = None
     def update(self,val, num):
         self.cal = val
         self.versionNum = num
