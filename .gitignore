@@ -9,5 +9,5 @@
 simplenetwork/__pycache__/TCPio.cpython-35.pyc
 
 *.xml
-
+.idea/*
 .idea/workspace.xml
