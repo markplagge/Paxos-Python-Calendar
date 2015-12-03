@@ -34,11 +34,13 @@ class Proposer(threading.Thread):
 
 
     def run(self):
+        print("Starting Paxos Protocol...")
+
         while "Cats" != "Dogs":
 
             print("WE NEED INPUT FROM USER HERE RIGHT?")
 
-            print("Starting Paxos Protocol...")
+
             # 1. Check for client requests:
                 #2. If we have a request from a client, generate a proposal, and send it to leader
             self.clientRequestHandler()
@@ -46,6 +48,7 @@ class Proposer(threading.Thread):
             # 3. Check for proposals in the inProposalQueue
                 # 4. If we got a proposal, run synod
             if self.countMessagesOfType("PROPOSAL") > 0:
+                print("Proposer: Received proposal message, I am the leader, executing Synod")
                 self.current_proposal_message = self.getMessageOfType("PROPOSAL")
                 accNum, accVal,success = self.execSynod()
                 #5. Return proposal results to the requesting proposer
@@ -59,17 +62,13 @@ class Proposer(threading.Thread):
                 success = curResultMessage.messType
                 accVal = curResultMessage.accVal
 
+                if success is False:
+                    print("Proposer: Paxos Failed, returning updated calendar to client")
+                elif success is True:
+                    print("Proposer: Paxos Success, returning updated calendar to client")
                 self.toClientQueue.put(success, accVal)
 
-                #Do result message stuff here
 
-
-            # success = self.execSynod()
-            #
-            # if success is False:
-            #     print("Paxos Failed, Starting Over")
-            # else:
-            #     print("Paxos Success! Starting Over")
 
 
     def addToOutQ(self, message):
@@ -116,13 +115,10 @@ class Proposer(threading.Thread):
         """1. Check for client requests:
         #2. If we have a request from a client, generate a proposal, and send it to leader"""
         if self.fromClientQueue.qsize() > 0:
+            print("Proposer: Got request from client, forwarding to leader")
             proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
                                         m=self.chooseNewPropNum(), accNum=-1, accVal=self.fromClientQueue.get())
             self.addToOutQ((proposalM,self.ldr.clIP))
-
-
-
-
 
 
 
@@ -141,7 +137,7 @@ class Proposer(threading.Thread):
         ct = 0
         v = []
         while len(v) < self.N/2 and ct < self.timeout:
-            print("Waiting... %i/%i"%(ct+1, timeout))
+            print("Proposer: Waiting... %i/%i"%(ct+1, timeout))
             # move the incomming queue messages to the waiting messages, check for old server messages ###
             sleep(1)
             ct += 1
@@ -152,12 +148,13 @@ class Proposer(threading.Thread):
 
 
     def execSynod(self):
+
         nextm = self.chooseNewPropNum(self.lastm)
 
 
         #Send prepare message with nextm to all other nodes' acceptors
 
-        print("Sending prepare messages...")
+        print("Proposer: Sending prepare messages...")
 
         prepMess = MessDef.NetMess(messType = "PREPARE", sender = self.ldr.myIP, m = nextm)
         pickledPrepMess = prepMess.pickleMe()
@@ -165,14 +162,14 @@ class Proposer(threading.Thread):
         self.outQ.put(pickledPrepMess)
 
 
-        print("Prepare messages put in queue!")
+        print("Proposer: Prepare messages put in queue!")
 
 
         #check queue, wait for majority of promise(accNum, accVal)
             #if majority, send accept to all other nodes' acceptors
             #else start over
 
-        print("Waiting for promises...")
+        print("Proposer: Waiting for promises...")
         
         list_of_messages,promise_result = self.waitForMajorityPromise()
 
@@ -180,13 +177,13 @@ class Proposer(threading.Thread):
         #   print("Waiting... %i/%i"%(t+1, timeout))
         #   sleep(1)
 
-        print("Done waiting, checking for majority promises")
+        print("Proposer: Done waiting, checking for majority promises")
 
         if not promise_result:
             return False
 
         #Otherwise you can move on now and send accept to all other nodes acceptors
-        print("Majority promise recieved")
+        print("Proposer: Majority promise recieved")
 
         #Collect all promise messages and get the largest accnNum value
         # maxAccNumVal = (0, "")
@@ -204,7 +201,7 @@ class Proposer(threading.Thread):
                 maxAccNumVal = (mess.accNum, mess.accVal)
 
 
-        print("Sending accept messages...")
+        print("Proposer: Sending accept messages...")
 
         acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
         pickledAcceptMess = acceptMess.pickleMe()
@@ -214,30 +211,30 @@ class Proposer(threading.Thread):
         #check queue, wait for majority of ack(accNum,accVal)
             #if majority, send commit(v) to all other nodes' acceptors
 
-        print("Accept messages put in queue!")
+        print("Proposer: Accept messages put in queue!")
 
 
         list_of_messages,ack_result = self.waitForMajorityAck()
 
 
-        print("Done waiting, checking for majority acks")
+        print("Proposer: Done waiting, checking for majority acks")
 
         if not ack_result:
             return False
 
-        print("Majority ack recieved")
+        print("Proposer: Majority ack recieved")
 
         #commitMessages = createBroadcastMessArray(messType = 'commit', N = self.N, sender = self.ID, accVal = maxAccNumVal[1])
 
 
-        print("Sending commit messages...")
+        print("Proposer: Sending commit messages...")
 
         commitMess = MessDef.NetMess(messType = "COMMIT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
         pickledCommitMess = commitMess.pickleMe()
 
         self.outQ.put(pickledCommitMess)
 
-        print("Commit messages put in queue!")
+        print("Proposer: Commit messages put in queue!")
 
         return True
 
