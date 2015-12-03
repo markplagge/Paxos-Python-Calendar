@@ -15,6 +15,7 @@ class NetMess(object):
 
     def pickleMe(self):
         return ("THIS SHOULD BE PICKLED BUT IT IS NOT")
+    
 
 
 
