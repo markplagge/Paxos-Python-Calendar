@@ -149,13 +149,9 @@ class Proposer(threading.Thread):
 
         #Send prepare message with nextm to all other nodes' acceptors
 
-        #create message
-        #prepMessages = createBroadcastMessArray(messType = 'prepare', N = self.N, sender = self.ID, m = self.nextm)
-
         print("Sending prepare messages...")
-        #for i in range(0,len(prepMessages)):
-        #    proposerOut.put(prepMessages[i])
-
+        
+        #TODO send the prepare messages!!!
 
 
         #check queue, wait for majority of promise(accNum, accVal)
@@ -172,46 +168,43 @@ class Proposer(threading.Thread):
 
         print("Done waiting, checking for majority promises")
 
-        if proposerIn.qsize() < math.ceil(self.N/2):
-            #you failed to get majority response
+        if not promise_result:
             return False
 
         #Otherwise you can move on now and send accept to all other nodes acceptors
         print("Majority promise recieved")
 
         #Collect all promise messages and get the largest accnNum value
+        # maxAccNumVal = (0, "")
+        # while proposerIn.qzise() > 0:
+        #     tempMess = proposerIn.get()
+        #     tempNum = tempMess.accNum
+        #
+        #     if tempNum > maxAccNumVal[0]:
+        #         maxAccNumVal = (tempNum, tempMess.accVal)
 
-        maxAccNumVal = (0, "")
-        while proposerIn.qzise() > 0:
-            tempMess = proposerIn.get()
-            tempNum = tempMess.accNum
 
-            if tempNum > maxAccNumVal[0]:
-                maxAccNumVal = (tempNum, tempMess.accVal)
+        maxAccNumVal = (-1, "")
+        for mess in list_of_messages:
+            if mess.accNum > maxAccNumVal[0]:
+                maxAccNumVal = (mess.accNum, mess.accVal)
 
-
-        #acceptMessages = createBroadcastMessArray(messType = 'accept', N = self.N, sender = self.ID, m = nextm, accVal = maxAccNumVal[1])
 
         print("Sending accept messages...")
-        # for i in range(0,len(acceptMessages)):
-        #     proposerOut.put(acceptMessages[i])
 
+        #TODO send the accept messages!!!
 
         #check queue, wait for majority of ack(accNum,accVal)
             #if majority, send commit(v) to all other nodes' acceptors
 
-        print("Waiting for acks...")
-        for t in range(0,timeout):
-            print("Waiting... %i/%i"%(t+1, timeout))
-            sleep(1)
+
+        list_of_messages,ack_result = self.waitForMajorityAck()
+
 
         print("Done waiting, checking for majority acks")
 
-        """THIS IS WRONG, YOU COULD HAVE WHO KNOWS WHAT IN THE QUEUE, NOT JUST ONE TYPE SO WE'RE COUNTING THE NUMBER OF MESSAGES NOT JUST AMOUNT OF TYPE"""
-        if proposerIn.qsize() < math.ceil(self.N/2):
-            #you failed to get majority response
+        if not ack_result:
             return False
-
 
         print("Majority ack recieved")
 
@@ -219,8 +212,9 @@ class Proposer(threading.Thread):
 
 
         print("Sending commit messages...")
-        # for i in range(0,len(commitMessages)):
-        #     proposerOut.put(commitMessages[i])
+
+
+        #TODO send the commit messages!!!
 
         return True
 
