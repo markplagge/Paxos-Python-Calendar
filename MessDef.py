@@ -19,7 +19,8 @@ class NetMess(object):
 
 
 
-
+def dePickle(netm):
+    return NetMess()
 def createBroadcastMessArray(messType = "INVALID", N= 1, sender = -1, m = -1, accNum = -1, accVal="cal goes here"):
 	
 	messArray = []
