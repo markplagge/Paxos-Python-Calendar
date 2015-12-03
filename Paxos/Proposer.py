@@ -2,25 +2,25 @@
 
 import threading
 import queue
-import leader.Leader
+from leader.Leader import Leader
 import MessDef
 import math
 import time.sleep as sleep
 
-proposerIn = queue.Queue()
-proposerOut = queue.Queue()
+# proposerIn = queue.Queue()
+# proposerOut = queue.Queue()
+
+
 timeout = 5 #time to wait for queue to determine if majority has been found
 
 
 class Proposer(threading.Thread):
 
-    def __init__(self,inQ,outQ,requestInQ, clientOutQ,
-                    ackQ, N = 1, ID = -1,  ldr = leader.Leader()):
+    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N = 1, ID = -1, ldr = Leader()):
         """Change q references later on to outQ and inQ equiv"""
 
-        self.queueOfMessagesAndRequestsFromClientThread = requestInQ
-        self.queueContainingMessagesAndDataForTheClientToProcess = clientOutQ
-        # self.ackQ = ackQ
+        self.fromClientQueue = requestInQ
+        self.toClientQueue = clientOutQ
         self.outQ = outQ
         self.inQ = inQ
         self.N = N
@@ -31,6 +31,46 @@ class Proposer(threading.Thread):
         self.inboundLock = threading.Lock()
 
         super().__init__()
+
+
+    def run(self):
+        while "Cats" != "Dogs":
+
+            print("WE NEED INPUT FROM USER HERE RIGHT?")
+
+            print("Starting Paxos Protocol...")
+            # 1. Check for client requests:
+                #2. If we have a request from a client, generate a proposal, and send it to leader
+            self.clientRequestHandler()
+
+            # 3. Check for proposals in the inProposalQueue
+                # 4. If we got a proposal, run synod
+            if self.countMessagesOfType("PROPOSAL") > 0:
+                self.current_proposal_message = self.getMessageOfType("PROPOSAL")
+                accNum, accVal,success = self.execSynod()
+                #5. Return proposal results to the requesting proposer
+                resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
+                                                sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal)
+                self.addToOutQ((resultMessage,self.current_proposal_message.sender))
+
+            # 6. Check for results in resultQ. If there are any, relay them to client (along with updated calendar)
+            curResultMessage = self.getMessageOfType("RESULT")
+            if curResultMessage is not None:
+                success = curResultMessage.messType
+                accVal = curResultMessage.accVal
+
+                self.toClientQueue.put(success, accVal)
+
+                #Do result message stuff here
+
+
+            # success = self.execSynod()
+            #
+            # if success is False:
+            #     print("Paxos Failed, Starting Over")
+            # else:
+            #     print("Paxos Success! Starting Over")
+
 
     def addToOutQ(self, message):
         if isinstance(message, tuple):
@@ -51,6 +91,8 @@ class Proposer(threading.Thread):
         for em in mx:
             self.inQ.put(em)
         return list(rv)
+
+
     def getMessageOfType(self, messageType):
         m  = self.getMessagesOfType(messageType)
         result = None
@@ -73,49 +115,15 @@ class Proposer(threading.Thread):
     def clientRequestHandler(self):
         """1. Check for client requests:
         #2. If we have a request from a client, generate a proposal, and send it to leader"""
-        if self.queueOfMessagesAndRequestsFromClientThread.qsize() > 0:
+        if self.fromClientQueue.qsize() > 0:
             proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
-                                        m=self.chooseNewPropNum(), accNum=-1, accVal=self.queueOfMessagesAndRequestsFromClientThread.get())
+                                        m=self.chooseNewPropNum(), accNum=-1, accVal=self.fromClientQueue.get())
             self.addToOutQ((proposalM,self.ldr.clIP))
 
 
 
 
 
-    def run(self):
-        while "Cats" != "Dogs":
-
-            print("WE NEED INPUT FROM USER HERE RIGHT?")
-
-            print("Starting Paxos Protocol...")
-            #1. Check for client requests:
-            #2. If we have a request from a client, generate a proposal, and send it to leader
-            self.clientRequestHandler()
-            #3. Check for proposals in the inProposalQueue
-            #4. If we got a proposal, run synod
-            if self.countMessagesOfType("PROPOSAL") > 0:
-                self.current_proposal_message = self.getMessageOfType("PROPOSAL")
-                accNum, accVal,success = self.execSynod()
-                #5. Return proposal results to the requesting proposer
-                resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
-                                                sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal)
-                self.addToOutQ((resultMessage,self.current_proposal_message.sender))
-            #6. Check for results in resultQ. If there are any, relay them to client (along with updated calendar)
-            curResultMessage = self.getMessageOfType("RESULT")
-            if curResultMessage is not None:
-                self.queueContainingMessagesAndDataForTheClientToProcess.put(MessDef.NetMess(messType=success, accVal = accVal))
-                #Do result message stuff here
-
-
-
-
-
-            success = self.execSynod()
-
-            if success is False:
-                print("Paxos Failed, Starting Over")
-            else:
-                print("Paxos Success! Starting Over")
 
 
     def chooseNewPropNum(self,lastm):
@@ -151,7 +159,7 @@ class Proposer(threading.Thread):
 
         print("Sending prepare messages...")
 
-        prepMess = MessDef.NetMess(messType = "PREPARE", sender = ldr.myIP, m = nextm)
+        prepMess = MessDef.NetMess(messType = "PREPARE", sender = self.ldr.myIP, m = nextm)
         pickledPrepMess = prepMess.pickleMe()
 
         self.outQ.put(pickledPrepMess)
@@ -198,7 +206,7 @@ class Proposer(threading.Thread):
 
         print("Sending accept messages...")
 
-        acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
         pickledAcceptMess = acceptMess.pickleMe()
 
         self.outQ.put(pickledAcceptMess)
@@ -224,7 +232,7 @@ class Proposer(threading.Thread):
 
         print("Sending commit messages...")
 
-        commitMess = MessDef.NetMess(messType = "COMMIT", sender = ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        commitMess = MessDef.NetMess(messType = "COMMIT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
         pickledCommitMess = commitMess.pickleMe()
 
         self.outQ.put(pickledCommitMess)
