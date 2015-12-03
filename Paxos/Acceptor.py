@@ -23,7 +23,7 @@ class Acceptor(threading.Thread):
         self.outQ = outQ
         self.inQ = inQ
         self.ldr = ldr
-        self.promiseN= 0
+        self.promiseN= -1
         self.promiseV= None
         self.acceptedN=None
         self.acceptedV=None
@@ -88,7 +88,7 @@ class Acceptor(threading.Thread):
         pkl = self.serializedCal
 
         outMess = MSG(messType="PROMISE", recipient = opmsg.sender, sender = self.myIP,
-                      m=opmsg.accNum, accNum=self.acceptedN, accVal=pkl)
+                      m=opmsg.accNum, accNum=self.promiseN, accVal=pkl)
 
         ##send message directly to the proposer we got it from
         self.outQ.put((outMess, opmsg.sender))
@@ -132,6 +132,10 @@ class Acceptor(threading.Thread):
 
     def receiveAccept(self,message):
         assert(isinstance(message,MessDef.NetMess))
+
+
+
+        #TODO: Check that M is the proper value here, not message.accN or whatever
         if self.promiseN <= message.m:
             self.promiseN = message.m
             self.acceptedV = message.accVal
@@ -159,16 +163,83 @@ class Acceptor(threading.Thread):
                 message = self.extractMessage(self.inQ.get())
                 cases[message.messType](message)
 
+class lProposal(object):
+    value = None
+    acceptors = None
+
+    def __init__(self,value, firstAcceptorID):
+        self.value = value
+        self.acceptors = []
+        self.acceptors.append(firstAcceptorID)
+
+    def newAcceptor(self, accID):
+        self.acceptors.append(accID)
+
+    @property
+    def numAcceptors(self):
+        """
+        Gets the number of acceptors who have agreed to this value
+        :rtype: int
+        """
+        if isinstance(self.acceptors, list):
+            return len(self.acceptors)
+        return 0
+    def __eq__(self, other):
+        if isinstance(other, lProposal):
+            return self.value == other.value
+        else:
+            return self.value == other
+
+
+
+class proposalTracker(object):
+    proposals = []
+    quorum = 1
+    def __init__(self, quorum):
+        self.quorum = quorum
+
+    def addProposal(self, value, accID):
+        prop = [x for x in self.proposals if x == value]
+        if prop:
+            prop.newAcceptor(accID)
+        else:
+            self.proposals.append(lProposal(value,accID))
+    def getWinner(self):
+        return filter(lambda v: v.numAcceptors > self.quorum,self.proposals)
+    @property
+    def isWinner(self):
+        return len(self.getWinner()) > 0
+
+
+
+
+
 
 
 class Learner(object):
     """
-    A basic learner class - is actually attached to an Acceptor
+    A basic learner class - is stored within an acceptor
     """
-    cal = None
-    def update(self,val, num):
+
+
+    value = None ## The final calendar value accepted/commited
+    valueStore = None ## Keeps a log of all of the versions of the calendar
+    value_id = None
+
+    def __init__(self, persistantFN="pers.dat"):
+        self.values = dict()
+        self.proposals = dict()
+        self.fn = persistantFN
+
+
+    def update(self,val,num):
+
+        if self.
+
         self.cal = val
         self.versionNum = num
+
+    def gotAccepted(self,opMessage):
 
 
     def responseMsg(self,opMessage):
