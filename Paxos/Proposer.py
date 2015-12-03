@@ -20,7 +20,7 @@ class Proposer(threading.Thread):
 
         self.queueOfMessagesAndRequestsFromClientThread = requestInQ
         self.queueContainingMessagesAndDataForTheClientToProcess = clientOutQ
-        self.ackQ = ackQ
+        # self.ackQ = ackQ
         self.outQ = outQ
         self.inQ = inQ
         self.N = N
@@ -152,8 +152,12 @@ class Proposer(threading.Thread):
         print("Sending prepare messages...")
 
         prepMess = MessDef.NetMess(messType = "PREPARE", sender = ldr.myIP, m = nextm)
+        pickledPrepMess = prepMess.pickleMe()
 
-        #TODO send the prepare messages!!!
+        self.outQ.put(pickledPrepMess)
+
+
+        print("Prepare messages put in queue!")
 
 
         #check queue, wait for majority of promise(accNum, accVal)
@@ -194,10 +198,15 @@ class Proposer(threading.Thread):
 
         print("Sending accept messages...")
 
-        #TODO send the accept messages!!!
+        acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        pickledAcceptMess = acceptMess.pickleMe()
+
+        self.outQ.put(pickledAcceptMess)
 
         #check queue, wait for majority of ack(accNum,accVal)
             #if majority, send commit(v) to all other nodes' acceptors
+
+        print("Accept messages put in queue!")
 
 
         list_of_messages,ack_result = self.waitForMajorityAck()
@@ -215,8 +224,12 @@ class Proposer(threading.Thread):
 
         print("Sending commit messages...")
 
+        commitMess = MessDef.NetMess(messType = "COMMIT", sender = ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        pickledCommitMess = commitMess.pickleMe()
 
-        #TODO send the commit messages!!!
+        self.outQ.put(pickledCommitMess)
+
+        print("Commit messages put in queue!")
 
         return True
 
