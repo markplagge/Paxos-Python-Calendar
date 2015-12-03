@@ -150,7 +150,9 @@ class Proposer(threading.Thread):
         #Send prepare message with nextm to all other nodes' acceptors
 
         print("Sending prepare messages...")
-        
+
+        prepMess = MessDef.NetMess(messType = "PREPARE", sender = ldr.myIP, m = nextm)
+
         #TODO send the prepare messages!!!
 
 
