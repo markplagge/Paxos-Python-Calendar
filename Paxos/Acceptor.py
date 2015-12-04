@@ -1,11 +1,14 @@
 ﻿import threading
 import queue
+
 import leader.Leader
 import MessDef
 from pCalendar import UserCal
 from MessDef import NetMess as MSG
 import pickle
 import copy
+import numpy as np
+import unittest
 #Global Acceptor Queue:
 
 acceptorIn = queue.Queue()
@@ -17,7 +20,7 @@ acceptorOut = queue.Queue()
 
 class Acceptor(threading.Thread):
     """represents an accecptor in Paxos. Is threaded."""
-    def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = leader.Leader.Leader(), thisIP=None):
+    def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = None, thisIP="127.0.0.1"):
         super().__init__()
         self.daemon = daemon
         self.outQ = outQ
@@ -27,11 +30,18 @@ class Acceptor(threading.Thread):
         self.promiseV= None
         self.acceptedN=None
         self.acceptedV=None
-
-        if thisIP is None:
-            self.myIP = self.ldr.myIP
+        self.ldr = ldr
+        if ldr is None:
+            self.myIP =  thisIP
         else:
-            self.myIP = thisIP
+            try:
+                assert(isinstance(ldr,leader.Leader.Leader) or
+                       isinstance(ldr,leader.Leader.LeaderAs))
+                self.myIP = self.ldr.myIP
+            except:
+                print("Acceptor error - no valid leader given, or no IP set.")
+                print("My IP is " + str(self.myIP) + ", LDR is " + str(ldr))
+                exit(-1)
 
         self.learner = Learner()
 
@@ -148,8 +158,10 @@ class Acceptor(threading.Thread):
         ##MESSAGE IS LERN'D
 
     def extractMessage(self,message):
+        return message
         ##Multi-part message de-serializer
-        return(MessDef.dePickle(message))
+        #return(MessDef.dePickle(message))
+
 
     def run(self):
         cases = {
@@ -162,6 +174,7 @@ class Acceptor(threading.Thread):
                 #we have a message - let's deal with it:
                 message = self.extractMessage(self.inQ.get())
                 cases[message.messType](message)
+
 
 class lProposal(object):
     value = None
@@ -197,21 +210,67 @@ class proposalTracker(object):
     quorum = 1
     def __init__(self, quorum):
         self.quorum = quorum
+    def checkAddProposal(self,value,accID):
+        if(self.isWinner):
+            return True
+        self.addProposal(value,accID)
+        return self.isWinner
+
+
 
     def addProposal(self, value, accID):
         prop = [x for x in self.proposals if x == value]
-        if prop:
-            prop.newAcceptor(accID)
+        if len(prop) > 0:
+            prop[0].newAcceptor(accID)
         else:
             self.proposals.append(lProposal(value,accID))
     def getWinner(self):
-        return filter(lambda v: v.numAcceptors > self.quorum,self.proposals)
+        return list(filter(lambda v: v.numAcceptors > self.quorum,self.proposals))
     @property
     def isWinner(self):
         return len(self.getWinner()) > 0
 
 
 
+
+class testProposal(unittest.TestCase):
+    numVals = 100000
+    def setUp(self):
+
+        self.propt = proposalTracker((self.numVals / 2 )+1)
+
+        self.pids = []
+        for i in range(1,self.numVals):
+            self.pids.append("[Pₓ=" + str(i) + "]")
+
+        v=np.tile([1,2],self.numVals - 1)
+        v = list(v) + [1]
+
+        np.random.shuffle(v )
+        self.vals = list( v )
+
+        self.procValList = []
+        for pid in self.pids:
+            self.procValList.append((self.vals.pop(),pid))
+        print(self.procValList)
+        self.vals = list(v)
+
+
+
+    def testAddChecker(self):
+        tester = False
+        for pvp in self.procValList:
+            if self.propt.checkAddProposal(pvp[0],pvp[1]):
+                tester = True
+                break
+        assert(tester)
+
+
+    def testAddValues(self):
+        #receive "commit" messages
+        for pvp in self.procValList:
+            self.propt.addProposal(pvp[0],pvp[1])
+        assert(self.propt.isWinner)
 
 
 
@@ -234,13 +293,13 @@ class Learner(object):
 
     def update(self,val,num):
 
-        if self.
+
 
         self.cal = val
         self.versionNum = num
 
     def gotAccepted(self,opMessage):
-
+        pass
 
     def responseMsg(self,opMessage):
         opMessage.mesType = "RESPONSE"
@@ -248,3 +307,8 @@ class Learner(object):
         opMessage.recipient = opMessage.sender
         opMessage.sender = "ACCEPTOR"
         return (opMessage,opMessage.recipient)
+
+
+
+if __name__ == '__main__':
+    x = testProposal()
