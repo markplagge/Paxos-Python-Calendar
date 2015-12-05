@@ -50,7 +50,7 @@ def startupServers():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
-    
+    print("TCP Finished")
     return server
 
 def startSender():
