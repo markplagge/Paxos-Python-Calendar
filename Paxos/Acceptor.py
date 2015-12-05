@@ -439,7 +439,9 @@ class testLearner(unittest.TestCase):
 
 
 
-
+class testAcceptor(unittest.TestCase):
+    def setUp(self):
+        self.
 
 if __name__ == '__main__':
     x = testProposal()
