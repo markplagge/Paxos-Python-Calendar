@@ -237,19 +237,18 @@ class Proposer(threading.Thread):
 
         print("Proposer: Accept messages put in queue!")
 
+        print("Proposer: Waiting for accepted messages")
 
-        list_of_messages,ack_result = self.waitForMajorityAck()
+        list_of_messages,result = self.waitForMajority("ACCEPTED")
+        if not result:
+            retAccNum = None
+            retAccVal = self.lastCommittedVal
+            retSuccess = False
+            return retAccNum,retAccVal, retSuccess
+
+        print("Proposer recived accepted messages. ")
 
 
-        print("Proposer: Done waiting, checking for majority acks")
-
-        if not ack_result:
-            retAccNum= None
-            retAccVal= self.lastCommittedVal
-            retSuccess= False
-            return retAccNum, retAccVal, retSuccess
-
-        print("Proposer: Majority ack recieved")
 
         #commitMessages = createBroadcastMessArray(messType = 'commit', N = self.N, sender = self.ID, accVal = maxAccNumVal[1])
 

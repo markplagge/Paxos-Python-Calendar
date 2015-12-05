@@ -66,7 +66,8 @@ class Client(threading.Thread):
 
 
     def execClient(self):
-        while 'cats' != 'dogs':
+        running = True
+        while running:
 
             prompt1 = "\n\n1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
@@ -74,8 +75,8 @@ class Client(threading.Thread):
             prompt4 = "4. Refresh\n"
 
             print(prompt1 + prompt2 + prompt3 + prompt4)
-            choice = int(input("What would you like to do?\n"))
-
+            #choice = int(input("What would you like to do?\n"))
+            choice = 0
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
 
@@ -130,7 +131,8 @@ class Client(threading.Thread):
 
                     print("Added Test Event")
 
-            time.sleep(1)
+            time.sleep(30)
+            running = False
 
 
 
