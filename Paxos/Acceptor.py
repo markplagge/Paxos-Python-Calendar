@@ -12,6 +12,7 @@ import unittest
 
 
 import os
+import unittest
 #Global Acceptor Queue:
 
 acceptorIn = queue.Queue()
@@ -25,6 +26,7 @@ class Acceptor(threading.Thread):
     """represents an accecptor in Paxos. Is threaded."""
     def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = None, thisIP="127.0.0.1", thisPort="5309"):
         super().__init__()
+        self.running = True
         self.daemon = daemon
         self.outQ = outQ
         self.inQ = inQ
@@ -85,13 +87,14 @@ class Acceptor(threading.Thread):
     ##CALENDAR PICKLE SERIALIZER##
     @property
     def serializedCal(self):
-        pkl = None
-        try:
-            assert(isinstance(self.acceptedV, UserCal.Calendar))
-            pkl = pickle.dumps(self.acceptedV,protocol=pickle.HIGHEST_PROTOCOL)
-        except:
-            pkl = None
-        return pkl
+        # pkl = None
+        # try:
+        #     assert(isinstance(self.acceptedV, UserCal.Calendar))
+        #     pkl = pickle.dumps(self.acceptedV,protocol=pickle.HIGHEST_PROTOCOL)
+        # except:
+        #     pkl = None
+        # return pkl
+        return self.promiseV
 
     ### MESSAGE GENERATION ###
     def newPromise(self, opmsg):
@@ -104,14 +107,14 @@ class Acceptor(threading.Thread):
                       m=opmsg.accNum, accNum=self.promiseN, accVal=pkl)
 
         ##send message directly to the proposer we got it from
-        self.outQ.put((outMess, opmsg.sender))
+        self.outQ.put((outMess.pickleMe(), opmsg.sender))
 
     def nackPromise(self, opmsg):
 
         opmsg.messType="NACK"
         opmsg.recipient=opmsg.sender
         opmsg.sender = self.myIP
-        self.outQ.put((opmsg,opmsg.recipient))
+        self.outQ.put((opmsg.pickleMe(),opmsg.recipient))
 
 
 
@@ -121,8 +124,8 @@ class Acceptor(threading.Thread):
         message.accNum = self.acceptedN
         message.recipient = message.sender
         message.sender = self.myIP
-        message.accVal = self.serializedCal
-        self.outQ.put((message))
+        message.accVal = self.acceptedV
+        self.outQ.put(message.pickleMe())
 
 
     def receivePrepare(self,message):
@@ -134,13 +137,14 @@ class Acceptor(threading.Thread):
         assert(isinstance(message,MessDef.NetMess))
         #Neil pointed out that we might get repeated messages... so I've got a nice if then else chain here
         #First, we assume that the proposal id is too large then smaller. dupes should fall through?
-        with message.accNum as pid:
-            if(self.promiseN <= message.m ):
+        m = message.m
 
-                self.newPromise(message)
-                self.promiseN = message.m
-            else:
-                self.nackPromise(message)
+        if(self.promiseN <= m ):
+
+            self.newPromise(message)
+            self.promiseN = m
+        else:
+            self.nackPromise(message)
 
 
     def receiveAccept(self,message):
@@ -149,15 +153,17 @@ class Acceptor(threading.Thread):
 
 
         #TODO: Check that M is the proper value here, not message.accN or whatever
-        if self.promiseN <= message.m:
-            self.promiseN = message.m
+        if self.promiseN <= message.accNum:
+            self.promiseN = message.accVal
             self.acceptedV = message.accVal
             self.acceptedN = self.promiseN
             self.accepted(copy.deepcopy(message)) #deep copy, so we can send the same data to the learner msg generator
 
     def receiveCommit(self, message):
-        self.learner.update(message.accVal, self.acceptedN)
-        self.outQ.put(self.learner.responseMsg(message)) #destroys the message
+        response = self.learner.gotCommit(message)
+
+        #self.learner.update(message.accVal, self.acceptedN)
+        self.outQ.put(response.pickleMe()) #destroys the message
         ##MESSAGE IS LERN'D
 
     def extractMessage(self,message):
@@ -167,16 +173,20 @@ class Acceptor(threading.Thread):
 
 
     def run(self):
+
         cases = {
             "PREPARE":self.receivePrepare,
             "ACCEPT":self.receiveAccept,
             "COMMIT":self.receiveCommit
         }
-        while(True):
+        while(self.running):
             if self.inQ.qsize() > 0:
                 #we have a message - let's deal with it:
                 message = self.extractMessage(self.inQ.get())
+                if isinstance(message,tuple):
+                    message = message[0]
                 cases[message.messType](message)
+                self.inQ.task_done()
 
 
 class lProposal(object):
