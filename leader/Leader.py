@@ -245,6 +245,7 @@ class Leader(threading.Thread):
 
 
     def run(self):
+        print("Leader starting!!!")
         self.live = threading.Timer(1,self.ttime)
         self.live.start()
         self.elect()

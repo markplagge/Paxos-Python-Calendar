@@ -1,7 +1,7 @@
 import threading
 import paxos.Acceptor
 import paxos.Proposer
-import paxos.GCD
+import paxos.gcd
 import leader.Leader
 import queue
 import simplenetwork
@@ -35,6 +35,9 @@ class Client(threading.Thread):
         #Create your node's Leader Process
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP)
 
+        ##Start up the leader:
+        self.ldrObj.daemon = True
+        self.ldrObj.start()
 
         #Create your node's Proposer Process
         self.propInQ = queue.Queue()
