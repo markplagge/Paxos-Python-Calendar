@@ -2,23 +2,29 @@ import threading
 import Paxos.Acceptor
 import Paxos.Proposer
 import Paxos.GCD
-import simplenetwork
 import leader.Leader
-import queue.Queue
+import queue
+import simplenetwork
 import pCalendar.UserCal
+from PromptHelper import addEventParsing, deleteEventParsing
+
 
 class Client(threading.Thread):
 
     def __init__(self,hosts, N=1, pID=1):
+        super().__init__()
+
+        svr = simplenetwork.Servers.startupServers()
+
         self.uID = pID
 
         self.locCalendar = pCalendar.UserCal.Calendar(username=pID)
 
-        inUDP = simplenetwork.serverData.inUDP
-        outUDP = simplenetwork.serverData.outUDP
+        inUDP = simplenetwork.serverData.mainServerQueue.inUDP
+        outUDP = simplenetwork.serverData.mainServerQueue.outUDP
 
-        inTCP = simplenetwork.serverData.inTCP #Goes to leader
-        outTCP = simplenetwork.serverData.outTCP #Goes to leader
+        inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
+        outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
 
         #Create your node's Leader Process
@@ -42,8 +48,12 @@ class Client(threading.Thread):
         #Create your node's Grand Central Dispatch
         gcdObj = Paxos.GCD.GCD(inQ=inUDP, propQ=propInQ, acceptQ=acceptInQ)
 
+        self.daemon = True
+
+
     def execClient(self):
         while 'cats' != 'dogs':
+
             prompt1 = "1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
@@ -54,29 +64,31 @@ class Client(threading.Thread):
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
 
-                numEvents = len(self.theCalendar.cal)
+                numEvents = len(self.locCalendar.cal)
 
                 for i in range(0,numEvents):
-                    print('\t%i. '%(i) + str(self.theCalendar.cal[i]))
+                    print('\t%i. '%(i) + str(self.locCalendar.cal[i]))
                 print('------------\n\n')
 
             elif choice == 2: #Add event to calendar
                 newEvent = addEventParsing(self)
-                parts = newEvent.participants
-                outboundEvents = []
 
-                algHelper.alginsert(self,newEvent)
+                self.locCalendar.addEntry(newEvent)
 
-                for i in parts:
-                    if i is not self.uid:
-                        algHelper.algsend(self,i) #Notify of the new insert that concerns them
 
                 print('------------\n\n')
-                return outboundEvents
+
+
+
             elif choice == 3: #Remove event from calendar
-                eventToDelete = deleteEventParsing(self.theCalendar)
-                parts = eventToDelete.participants
+                eventToDelete = deleteEventParsing(self.locCalendar)
+
+                self.locCalendar.removeEntry(eventToDelete)
 
 
-                algHelper.algdelete(self,eventToDelete)
 
+if __name__ == '__main__':
+    print("Starting")
+    theClient = Client(1)
+
+    theClient.execClient()

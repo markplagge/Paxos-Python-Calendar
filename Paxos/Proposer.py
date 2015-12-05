@@ -5,7 +5,7 @@ import queue
 from leader.Leader import Leader
 import MessDef
 import math
-import time.sleep as sleep
+from time import sleep
 
 # proposerIn = queue.Queue()
 # proposerOut = queue.Queue()
@@ -18,7 +18,7 @@ class Proposer(threading.Thread):
 
     def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader()):
         """Change q references later on to outQ and inQ equiv"""
-
+        super().__init__()
         self.fromClientQueue = requestInQ
         self.toClientQueue = clientOutQ
         self.outQ = outQ
@@ -31,7 +31,6 @@ class Proposer(threading.Thread):
         self.inboundLock = threading.Lock()
         self.lastCommittedVal = None
 
-        super().__init__()
 
 
     def run(self):

@@ -17,7 +17,7 @@ def addEventParsing(client, test=False):
 
 
         print (addWelcome)
-        
+
         # month = int(input(getMonth))
         day = int(input(getDay))
         # year = int(input(getYear))
