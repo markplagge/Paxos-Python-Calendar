@@ -1,10 +1,9 @@
 import unittest
+import paxos.Acceptor
+import MessDef
 
+class TestAcceptor(unittest.TestCase):
 
-class TetAcceptor(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)
-    class testAcceptor(unittest.TestCase):
     def setUp(self):
         import datetime
         from numpy import random as random
@@ -57,6 +56,23 @@ class TetAcceptor(unittest.TestCase):
             np.random.shuffle( self.events)
             cal.cal = self.events
             self.calendars.append(i,cal)
+        ##Messages
+        self.messageTypes = ["PROPOSE", "PROMISE", "ACCEPT", "COMMIT", "ACK"]
+        self.recips = ["127.0.0.1", "192.168.1.1"]
+        self.senders = ["127.0.0.1", "192.168.1.1"]
+        self.m = [1,2,3,4,5]
+        self.accNums = [1,2,3,4,5]
+
+        r = self.recips[0]
+        s = self.senders[0]
+
+
+        self.messages = {}
+        self.messages["PREPARE"] = MessDef.NetMess(messType="PREPARE",recipient=self.recips[0],sender=self.recips[1])
+        self.messages["ACCEPT"] = MessDef.NetMess(messType="ACCEPT", recipient=self.recips[0],sender=self.recips[1])
+        self.messages["COMMIT"] = MessDef.NetMess(messType="COMMIT", recipient=self.recips[0],sender=self.recips[1])
+
+
 
 #Message long
 #PREPARE ->
@@ -67,8 +83,6 @@ class TetAcceptor(unittest.TestCase):
 
 
 
-if __name__ == '__main__':
-    x = testProposal()
 
 
 if __name__ == '__main__':
