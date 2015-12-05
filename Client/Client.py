@@ -8,6 +8,7 @@ import simplenetwork
 import pCalendar.UserCal
 from PromptHelper import addEventParsing, deleteEventParsing
 from MessDef import NetMess
+import time
 
 class Client(threading.Thread):
 
@@ -51,6 +52,8 @@ class Client(threading.Thread):
 
         #Create your node's Grand Central Dispatch
         gcdObj = Paxos.GCD.GCD(inQ=inUDP, propQ=propInQ, acceptQ=acceptInQ)
+        gcdObj.setDaemon(True)
+        gcdObj.start()
 
         self.daemon = True
 
@@ -58,7 +61,7 @@ class Client(threading.Thread):
     def execClient(self):
         while 'cats' != 'dogs':
 
-            prompt1 = "1. View your calendar\n"
+            prompt1 = "\n\n1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
             prompt4 = "4. Refresh"
@@ -106,6 +109,8 @@ class Client(threading.Thread):
                 print("YOU DID NOTHING YOU DINGBAT")
 
                 print('------------\n\n')
+
+            time.sleep(1)
 
 
 
