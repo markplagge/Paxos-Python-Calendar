@@ -6,3 +6,6 @@ TODO:
 		
 [ ] - Client and Client interface
 [ ]	- main thread
+
+[ ] - Log stored in stable storage
+[ ] - Client reloads calendar on boot
