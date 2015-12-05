@@ -100,7 +100,7 @@ class Proposer(threading.Thread):
 
         self.outQ.put(message)
 
-
+    #The worst variable names ever
     def getMessagesOfType(self,messageType):
         mx = []
         while(self.inQ.qsize() > 0):
@@ -163,7 +163,6 @@ class Proposer(threading.Thread):
             tmp = self.getMessagesOfType(messageType)
             for x in tmp:
                 v.append(x)
-        print()
         return v, len(v) > self.N/2
 
 
