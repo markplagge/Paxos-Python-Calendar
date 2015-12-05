@@ -4,8 +4,10 @@ TODO:
 [ ] - Test Acceptor
 [x] - Grand Central Dispatch
 		
-[ ] - Client and Client interface
-[ ]	- main thread
+[x] - Client and Client interface
+[/]	- main thread
 
 [ ] - Log stored in stable storage
 [ ] - Client reloads calendar on boot
+
+[ ] - Depickle in MessDef
