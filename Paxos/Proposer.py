@@ -38,8 +38,6 @@ class Proposer(threading.Thread):
 
         while "Cats" != "Dogs":
 
-            print("WE NEED INPUT FROM USER HERE RIGHT?")
-
 
             # 1. Check for client requests:
                 #2. If we have a request from a client, generate a proposal, and send it to leader
@@ -136,7 +134,7 @@ class Proposer(threading.Thread):
         if self.fromClientQueue.qsize() > 0:
             print("Proposer: Got request from client, forwarding to leader")
             proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
-                                        m=self.chooseNewPropNum(), accNum=-1, accVal=self.fromClientQueue.get())
+                                        m=self.chooseNewPropNum(self.lastm), accNum=-1, accVal=self.fromClientQueue.get())
             self.addToOutQ((proposalM,self.ldr.clIP))
 
 

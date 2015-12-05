@@ -7,7 +7,7 @@ import queue
 import simplenetwork
 import pCalendar.UserCal
 from PromptHelper import addEventParsing, deleteEventParsing
-
+from MessDef import NetMess
 
 class Client(threading.Thread):
 
@@ -39,11 +39,15 @@ class Client(threading.Thread):
         self.propToClientQ = queue.Queue()
 
         self.propObj = Paxos.Proposer.Proposer(propInQ,propOutQ,self.clientToPropQ, self.propToClientQ, N= N, ID= pID, ldr=self.ldrObj)
+        self.propObj.setDaemon(True)
+        self.propObj.start()
 
         #Create your node's Acceptor Process
         acceptInQ = queue.Queue()
         acceptOutQ = queue.Queue()
         self.acceptObj = Paxos.Acceptor.Acceptor(outQ = acceptOutQ, inQ = acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
+        self.acceptObj.setDaemon(True)
+        self.acceptObj.start()
 
         #Create your node's Grand Central Dispatch
         gcdObj = Paxos.GCD.GCD(inQ=inUDP, propQ=propInQ, acceptQ=acceptInQ)
@@ -57,6 +61,7 @@ class Client(threading.Thread):
             prompt1 = "1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
+            prompt4 = "4. Refresh"
 
             print(prompt1 + prompt2 + prompt3)
             choice = int(input("What would you like to do?\n"))
@@ -75,6 +80,11 @@ class Client(threading.Thread):
 
                 self.locCalendar.addEntry(newEvent)
 
+                #Create REQUEST message, send it to the node's proposer
+                rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
+
+                self.clientToPropQ.put(rqstMess)
+
 
                 print('------------\n\n')
 
@@ -84,6 +94,20 @@ class Client(threading.Thread):
                 eventToDelete = deleteEventParsing(self.locCalendar)
 
                 self.locCalendar.removeEntry(eventToDelete)
+
+                rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
+
+                self.clientToPropQ.put(rqstMess)
+
+
+                print('------------\n\n')
+
+            elif choice == 4: #Check for RESULTs from proposer
+                print("YOU DID NOTHING YOU DINGBAT")
+
+                print('------------\n\n')
+
+
 
 
 
