@@ -120,7 +120,7 @@ class Acceptor(threading.Thread):
 
     def accepted(self, message):
         assert(isinstance(message, MSG))
-        message.messType = "ACCEPTED"
+        message.messType = "ACK"
         message.accNum = self.acceptedN
         message.recipient = message.sender
         message.sender = self.myIP

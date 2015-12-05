@@ -118,8 +118,7 @@ class Proposer(threading.Thread):
         result = None
         try:
             result = m[0]
-            for em in m:
-                self.inQ.put(em)
+            
         except:
             result = None
 
@@ -239,7 +238,7 @@ class Proposer(threading.Thread):
 
         print("Proposer: Waiting for accepted messages")
 
-        list_of_messages,result = self.waitForMajority("ACCEPTED")
+        list_of_messages,result = self.waitForMajorityAck()
         if not result:
             retAccNum = None
             retAccVal = self.lastCommittedVal
