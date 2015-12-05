@@ -1,5 +1,6 @@
 import queue
 import threading
+from MessDef import dePickle
 
 class GCD(threading.Thread):
 
@@ -20,7 +21,7 @@ class GCD(threading.Thread):
                 print("Depickling.")
 
                 #Depickle the message
-                depickledMessage = pickledMessage.dePickle()
+                depickledMessage = dePickle(pickledMessage)
 
 
                 #What type of message is it?

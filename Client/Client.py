@@ -64,9 +64,9 @@ class Client(threading.Thread):
             prompt1 = "\n\n1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
-            prompt4 = "4. Refresh"
+            prompt4 = "4. Refresh\n"
 
-            print(prompt1 + prompt2 + prompt3)
+            print(prompt1 + prompt2 + prompt3 + prompt4)
             choice = int(input("What would you like to do?\n"))
 
             if choice == 1: #Print the events in the calendar
@@ -109,6 +109,15 @@ class Client(threading.Thread):
                 print("YOU DID NOTHING YOU DINGBAT")
 
                 print('------------\n\n')
+
+            elif choice == 0: #Add test event
+                newEvent = addEventParsing(self,test=True)
+
+                self.locCalendar.addEntry(newEvent)
+
+                rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
+
+                self.clientToPropQ.put(rqstMess)
 
             time.sleep(1)
 
