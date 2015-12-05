@@ -165,7 +165,7 @@ class Acceptor(threading.Thread):
         response = self.learner.gotCommit(message)
 
         #self.learner.update(message.accVal, self.acceptedN)
-        self.outQ.put(response.pickleMe()) #destroys the message
+        self.outQ.put((response[0].pickleMe(),response[1])) #destroys the message
         ##MESSAGE IS LERN'D
 
     def extractMessage(self,message):
