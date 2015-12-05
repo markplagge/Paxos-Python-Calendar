@@ -86,11 +86,14 @@ class Proposer(threading.Thread):
                 self.toClientQueue.put(success, accVal)
 
 
-
-
     def addToOutQ(self, message):
+        print("Proposer: Adding to my out Queue")
         if isinstance(message, tuple):
-            message[0] = message[0].pickleMe()
+            
+            msg0 = message[0].pickleMe()
+            msg1 = message[1]
+
+            message = (msg0, msg1)
         else:
             message = message.pickleMe()
 
