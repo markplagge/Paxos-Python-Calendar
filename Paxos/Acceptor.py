@@ -9,6 +9,7 @@ import pickle
 import copy
 import numpy as np
 import unittest
+import os
 #Global Acceptor Queue:
 
 acceptorIn = queue.Queue()
@@ -233,6 +234,73 @@ class proposalTracker(object):
 
 
 
+
+
+
+class Learner(object):
+    """
+    A basic learner class - is stored within an acceptor
+    """
+
+
+    value = None ## The final calendar value accepted/commited
+    valueStore = []## Keeps a log of all of the versions of the calendar
+    value_id = None
+
+    def __init__(self,pid, persistantFN="Pstorage.dat"):
+        self.values = []
+        self.pid = pid
+        self.fn = str(pid) + persistantFN
+        self.ccal = None
+        self.ccalVersion = None
+
+        if os.path.isfile(self.fn):
+            with open(self.fn, mode="rb") as file:
+                self.values = pickle.load(file)
+                self.ccal = self.values[0][1]
+                self.ccalVersion = self.values[0][0]
+
+
+
+
+
+
+
+
+    def getAll(self):
+        return self.values
+
+    @property
+    def currentCal(self):
+        return self.ccal
+
+
+    def update(self,val,num):
+        self.ccal = val
+        self.ccalVersion = num
+        self.values.append((num,val))
+        with open(self.fn, mode="wb") as file:
+            pickle.dump(self.values, file,protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
+
+    def gotCommit(self, opMessage):
+        self.update(opMessage.accVal,opMessage.accNum)
+        return self.responseMsg(opMessage)
+
+    def responseMsg(self,opMessage):
+        opMessage.mesType = "RESPONSE"
+        opMessage.accVal = self.ccal
+        opMessage.accNum = self.ccalVersion
+        opMessage.recipient = opMessage.sender
+        opMessage.sender = "ACCEPTOR"
+        return (opMessage,opMessage.recipient)
+
+"""******************************************************************************
+UNIT TESTS FOR VARIOUS THINGS
+"""
+
 class testProposal(unittest.TestCase):
     numVals = 100000
     def setUp(self):
@@ -273,40 +341,103 @@ class testProposal(unittest.TestCase):
         assert(self.propt.isWinner)
 
 
+class testLearner(unittest.TestCase):
+
+    def wrd(self):
+        import datetime
+        from numpy import random as random
+
+        return datetime.datetime(random.randint(1970, 2014),
+                                 random.randint(1, 10),
+                                 random.randint(1, 20))
+    def tearDown(self):
+        for fn in self.createdFiles:
+            os.remove(fn)
 
 
-class Learner(object):
-    """
-    A basic learner class - is stored within an acceptor
-    """
-
-
-    value = None ## The final calendar value accepted/commited
-    valueStore = None ## Keeps a log of all of the versions of the calendar
-    value_id = None
-
-    def __init__(self, persistantFN="pers.dat"):
-        self.values = dict()
-        self.proposals = dict()
-        self.fn = persistantFN
-
-
-    def update(self,val,num):
+    def setUp(self):
+        import datetime
+        from numpy import random as random
+        import itertools
+        from pCalendar.UserCal import CalEvent
 
 
 
-        self.cal = val
-        self.versionNum = num
+        startDates = []
+        endDates = []
 
-    def gotAccepted(self,opMessage):
-        pass
+        fns = ["bob", "john", "ringo", "Paul", "Conan", "Mike"]
+        lns = ["Mario", "Luigi", "Walker", "LaQuarius", "Edmond", "Aadams"]
+        rnks = ["pleb", "midLevel", "CEO"]
 
-    def responseMsg(self,opMessage):
-        opMessage.mesType = "RESPONSE"
-        opMessage.accVal = self.cal
-        opMessage.recipient = opMessage.sender
-        opMessage.sender = "ACCEPTOR"
-        return (opMessage,opMessage.recipient)
+        self.events = []
+        fullNames = [fns, lns]
+        self.employeeList = []
+
+        for list in itertools.product(*fullNames):
+            self.employeeList.append(list)
+        # going to use about 50% overlap events for test:
+        startD = 1
+        startE = 4
+        for _ in range((int(len(self.employeeList) / 2))):
+            startDates.append(datetime.datetime(2016, 1, startD,
+                                                random.randint(1, 10),
+                                                random.randint(1, 5),
+                                                random.randint(1, 50)))
+            endDates.append(datetime.datetime(2016, 1, startE,
+                                              random.randint(1, 10),
+                                              random.randint(1, 5),
+                                              random.randint(1, 50)))
+            startD += 1
+            startE += 1
+        for _ in range((len(self.employeeList))):
+            sd = (self.wrd())
+            startDates.append(sd)
+            endDates.append(sd + datetime.timedelta(5))
+
+        for i in range(len(self.employeeList)):
+            self.events.append(CalEvent(startDates[i], endDates[i], self.employeeList[i][0],
+                                        self.employeeList[i][1], random.choice(rnks), "NONE"))
+        self.startDates = startDates
+        self.endDates = endDates
+        self.createdFiles = []
+
+    def testSave(self):
+        import datetime
+        from numpy import random as random
+        import itertools
+        from pCalendar.UserCal import CalEvent,Calendar
+
+        cald = Calendar("UnitTester")
+        cald.events = self.events
+        #create a fresh learner:
+        learnTst = Learner("unitTest-" + str( random.randint(1,10000)))
+        message = MessDef.NetMess(messType="COMMIT", recipient="127.0.0.1", accNum=1, accVal = cald)
+        learnTst.gotCommit(message)
+        self.createdFiles.append(learnTst.fn)
+        ## check that file exists now:
+        assert(os.path.isfile(learnTst.fn))
+        ##OK ! saved this sucker to disk!!!
+
+    def testLoad(self):
+        import datetime
+        from numpy import random as random
+        import itertools
+        from pCalendar.UserCal import CalEvent,Calendar
+        cald = Calendar("UnitTester")
+        cald.events = self.events
+        #create a fresh learner:
+        message = MessDef.NetMess(messType="COMMIT", recipient="127.0.0.1", accNum=1, accVal = cald)
+        lrnID  = "unitTest-" + str( random.randint(1,10000))
+        learnTst = Learner(lrnID)
+        learnTst.gotCommit(message)
+
+        loadLrn = Learner(lrnID)
+
+        print("OP is {}, learned is {}".format(cald,loadLrn.currentCal) )
+        assert(cald == loadLrn.currentCal)
+
+
 
 
 
