@@ -75,8 +75,8 @@ class Client(threading.Thread):
             prompt4 = "4. Refresh\n"
 
             print(prompt1 + prompt2 + prompt3 + prompt4)
-            #choice = int(input("What would you like to do?\n"))
-            choice = 0
+            choice = int(input("What would you like to do?\n"))
+
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
 
@@ -132,7 +132,7 @@ class Client(threading.Thread):
                     print("Added Test Event")
 
             time.sleep(30)
-            running = False
+
 
 
 

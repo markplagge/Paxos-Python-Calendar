@@ -157,7 +157,7 @@ class Acceptor(threading.Thread):
             self.promiseN = message.accVal
             self.acceptedV = message.accVal
             self.promiseN = message.m
-            
+
             self.acceptedN = self.promiseN
             self.accepted(copy.deepcopy(message)) #deep copy, so we can send the same data to the learner msg generator
 
