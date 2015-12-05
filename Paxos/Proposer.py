@@ -88,7 +88,7 @@ class Proposer(threading.Thread):
 
 
     def addToOutQ(self, message):
-        print("Proposer: Adding to my out Queue")
+        # print("Proposer: Adding to my out Queue")
         if isinstance(message, tuple):
             
             msg0 = message[0].pickleMe()
@@ -157,7 +157,6 @@ class Proposer(threading.Thread):
         ct = 0
         v = []
         while len(v) < self.N/2 and ct < self.timeout:
-            print("%i, "%(ct+1),end='')
             # move the incomming queue messages to the waiting messages, check for old server messages ###
             sleep(1)
             ct += 1
@@ -183,16 +182,16 @@ class Proposer(threading.Thread):
         self.outQ.put(pickledPrepMess)
 
 
-        print("Proposer: Prepare messages put in queue!")
+        # print("Proposer: Prepare messages put in queue!")
 
 
         #check queue, wait for majority of promise(accNum, accVal)
             #if majority, send accept to all other nodes' acceptors
             #else start over
 
-        print("Proposer: Waiting for promises...")
+        # print("Proposer: Waiting for promises...")
 
-        print("Proposer: Waiting for majority promises:  ",end='')
+        print("Proposer: Waiting for majority promises")
         list_of_messages,promise_result = self.waitForMajorityPromise()
 
         #for t in range(0,timeout):
@@ -235,9 +234,9 @@ class Proposer(threading.Thread):
         #check queue, wait for majority of ack(accNum,accVal)
             #if majority, send commit(v) to all other nodes' acceptors
 
-        print("Proposer: Accept messages put in queue!")
+        # print("Proposer: Accept messages put in queue!")
 
-        print("Proposer: Waiting for majority ack:  ",end='')
+        print("Proposer: Waiting for majority ack:")
 
         list_of_messages,ack_result = self.waitForMajorityAck()
 
