@@ -1,8 +1,8 @@
 TODO:
 
-[ ] - Make the learner learn properly
+[x] - Make the learner learn properly
 [ ] - Test Acceptor
-[ ] - Grand Central Dispatch
+[x] - Grand Central Dispatch
 		
 [ ] - Client and Client interface
-		main thread
+[ ]	- main thread

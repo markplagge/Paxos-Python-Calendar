@@ -16,7 +16,7 @@ timeout = 5 #time to wait for queue to determine if majority has been found
 
 class Proposer(threading.Thread):
 
-    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N = 1, ID = -1, ldr = Leader()):
+    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader()):
         """Change q references later on to outQ and inQ equiv"""
 
         self.fromClientQueue = requestInQ
@@ -29,6 +29,7 @@ class Proposer(threading.Thread):
         self.lastm = self.ID
         self.daemon = True
         self.inboundLock = threading.Lock()
+        self.lastCommittedVal = None
 
         super().__init__()
 
@@ -50,7 +51,26 @@ class Proposer(threading.Thread):
             if self.countMessagesOfType("PROPOSAL") > 0:
                 print("Proposer: Received proposal message, I am the leader, executing Synod")
                 self.current_proposal_message = self.getMessageOfType("PROPOSAL")
-                accNum, accVal,success = self.execSynod()
+
+                curCal = self.lastCommittedVal
+                propCal = self.current_proposal_message.accVal
+
+                isConflict = False
+                for curEvt in curCal.cal:
+                    for propEvt in propCal.cal:
+                        if (curEvt.willEventConflict(propEvt)):
+                            isConflict = True
+                            break
+                    if isConflict is True:
+                        break
+
+                if not isConflict:
+                    accNum, accVal,success = self.execSynod()
+                else:
+                    success = False
+                    accNum = None
+                    accVal = self.lastCommittedVal
+
                 #5. Return proposal results to the requesting proposer
                 resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
                                                 sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal)
@@ -233,6 +253,7 @@ class Proposer(threading.Thread):
         pickledCommitMess = commitMess.pickleMe()
 
         self.outQ.put(pickledCommitMess)
+        self.lastm = nextm
 
         print("Proposer: Commit messages put in queue!")
 
