@@ -1,7 +1,7 @@
 import threading
 import paxos.Acceptor
 import paxos.Proposer
-import paxos.GCD
+import paxos.gcd
 import leader.Leader
 import queue
 import simplenetwork
@@ -51,7 +51,7 @@ class Client(threading.Thread):
         self.acceptObj.start()
 
         #Create your node's Grand Central Dispatch
-        gcdObj = paxos.GCD.GCD(inQ=self.inUDP, propQ=self.propInQ, acceptQ=self.acceptInQ)
+        gcdObj = paxos.gcd.GCD(inQ=self.inUDP, propQ=self.propInQ, acceptQ=self.acceptInQ)
         gcdObj.setDaemon(True)
         gcdObj.start()
 

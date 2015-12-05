@@ -23,3 +23,5 @@ simplenetwork/__pycache__/Servers.cpython-35.pyc
 simplenetwork/__pycache__/TCPio.cpython-35.pyc
 
 simplenetwork/__pycache__/UDPio.cpython-35.pyc
+
+*.pyc
