@@ -4,6 +4,7 @@ import threading
 class GCD(threading.Thread):
 
     def __init__(self,inQ=queue.Queue(), propQ=queue.Queue(), acceptQ=queue.Queue()):
+        super().__init__()
         self.inQ = inQ
         self.propQ = propQ
         self.acceptQ = acceptQ
@@ -12,11 +13,15 @@ class GCD(threading.Thread):
     def run(self):
         while 'pigs' != 'can fly':
             if self.inQ.qsize() > 0:
+                print("GCD: Recieved a message... ",end='')
                 #You have a message!!
                 pickledMessage = self.inQ.get()
 
+                print("Depickling.")
+
                 #Depickle the message
                 depickledMessage = pickledMessage.dePickle()
+
 
                 #What type of message is it?
                     #PROPOSAL, RESULT, PROMISE, ACK -> PROPOSER
