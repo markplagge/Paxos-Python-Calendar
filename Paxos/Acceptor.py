@@ -120,7 +120,7 @@ class Acceptor(threading.Thread):
 
     def accepted(self, message):
         assert(isinstance(message, MSG))
-        message.messType = "ACCEPTED"
+        message.messType = "ACK"
         message.accNum = self.acceptedN
         message.recipient = message.sender
         message.sender = self.myIP
@@ -153,9 +153,11 @@ class Acceptor(threading.Thread):
 
 
         #TODO: Check that M is the proper value here, not message.accN or whatever
-        if self.promiseN <= message.accNum:
+        if self.promiseN <= message.m:
             self.promiseN = message.accVal
             self.acceptedV = message.accVal
+            self.promiseN = message.m
+
             self.acceptedN = self.promiseN
             self.accepted(copy.deepcopy(message)) #deep copy, so we can send the same data to the learner msg generator
 
