@@ -34,7 +34,7 @@ class Proposer(threading.Thread):
 
 
     def run(self):
-        print("Starting Paxos Protocol...")
+        print("Starting paxos Protocol...")
 
         while "Cats" != "Dogs":
 
@@ -80,9 +80,9 @@ class Proposer(threading.Thread):
                 accVal = curResultMessage.accVal
 
                 if success is False:
-                    print("Proposer: Paxos Failed, returning updated calendar to client")
+                    print("Proposer: paxos Failed, returning updated calendar to client")
                 elif success is True:
-                    print("Proposer: Paxos Success, returning updated calendar to client")
+                    print("Proposer: paxos Success, returning updated calendar to client")
                 self.toClientQueue.put(success, accVal)
 
 

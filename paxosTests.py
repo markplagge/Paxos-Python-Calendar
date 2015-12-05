@@ -155,7 +155,7 @@ class TestAcceptor(unittest.TestCase):
         self.srvr = FakeServer(self.recips)
         self.acceptors = {}
         for client in self.recips:
-            self.acceptors[client] = paxos.Acceptor.Acceptor(outQ=self.srvr.outQ(client),inQ=self.srvr.inQ(client),
+            self.acceptors[client] = paxos.Acceptor.Acceptor(outQ=self.srvr.outQ(client), inQ=self.srvr.inQ(client),
                                                              thisIP=client)
 
 #Message long

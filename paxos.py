@@ -1,7 +1,7 @@
 ﻿import asyncio
 import leader
 import simplenetwork
-import Paxos
+import paxos
 import pCalendar
 import sys
 

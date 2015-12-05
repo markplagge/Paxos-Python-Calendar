@@ -23,7 +23,7 @@ acceptorOut = queue.Queue()
 ''
 
 class Acceptor(threading.Thread):
-    """represents an accecptor in Paxos. Is threaded."""
+    """represents an accecptor in paxos. Is threaded."""
     def __init__(self, daemon = True, outQ = queue.Queue(), inQ = queue.Queue(), ldr = None, thisIP="127.0.0.1", thisPort="5309"):
         super().__init__()
         self.running = True

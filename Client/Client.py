@@ -1,7 +1,7 @@
 import threading
-import Paxos.Acceptor
-import Paxos.Proposer
-import Paxos.GCD
+import paxos.Acceptor
+import paxos.Proposer
+import paxos.GCD
 import leader.Leader
 import queue
 import simplenetwork
@@ -39,19 +39,19 @@ class Client(threading.Thread):
         self.clientToPropQ = queue.Queue()
         self.propToClientQ = queue.Queue()
 
-        self.propObj = Paxos.Proposer.Proposer(self.propInQ,self.propOutQ,self.clientToPropQ, self.propToClientQ, N= N, ID= pID, ldr=self.ldrObj)
+        self.propObj = paxos.Proposer.Proposer(self.propInQ, self.propOutQ, self.clientToPropQ, self.propToClientQ, N= N, ID= pID, ldr=self.ldrObj)
         self.propObj.setDaemon(True)
         self.propObj.start()
 
         #Create your node's Acceptor Process
         self.acceptInQ = queue.Queue()
         self.acceptOutQ = queue.Queue()
-        self.acceptObj = Paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
+        self.acceptObj = paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
         self.acceptObj.setDaemon(True)
         self.acceptObj.start()
 
         #Create your node's Grand Central Dispatch
-        gcdObj = Paxos.GCD.GCD(inQ=self.inUDP, propQ=self.propInQ, acceptQ=self.acceptInQ)
+        gcdObj = paxos.GCD.GCD(inQ=self.inUDP, propQ=self.propInQ, acceptQ=self.acceptInQ)
         gcdObj.setDaemon(True)
         gcdObj.start()
 
