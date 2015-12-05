@@ -1,7 +1,7 @@
 import threading
 import paxos.Acceptor
 import paxos.Proposer
-import paxos.gcd
+import paxos.GCD
 import leader.Leader
 import queue
 import simplenetwork
