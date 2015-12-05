@@ -14,11 +14,9 @@ class GCD(threading.Thread):
     def run(self):
         while 'pigs' != 'can fly':
             if self.inQ.qsize() > 0:
-                print("GCD: Recieved a message... ",end='')
+                print("GCD: Recieved a message... ")
                 #You have a message!!
                 pickledMessage = self.inQ.get()
-
-                print("Depickling.")
 
                 #Depickle the message
                 depickledMessage = dePickle(pickledMessage)
@@ -30,9 +28,9 @@ class GCD(threading.Thread):
 
                 if messType == 'PROPOSAL' or messType == 'RESULT' or messType == 'PROMISE' or messType == 'ACK':
                     self.propQ.put(depickledMessage)
-                    print("GCD SENT MESSAGE TO PROPOSER")
+                    print("GCD: Send Message to proposer: %s"%messType)
 
                      #PREPARE, ACCEPT, COMMIT-> ACCEPTOR
                 elif messType == 'PREPARE' or messType == 'ACCEPT' or messType == 'COMMIT':
                     self.acceptQ.put(depickledMessage)
-                    print("GCD SENT MESSAGE TO ACCEPTOR")
+                    print("GCD: Send Message to acceptor: %s"%messType)

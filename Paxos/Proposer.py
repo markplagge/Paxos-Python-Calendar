@@ -158,13 +158,14 @@ class Proposer(threading.Thread):
         ct = 0
         v = []
         while len(v) < self.N/2 and ct < self.timeout:
-            print("Proposer: Waiting for majority " )
+            print("%i, "%(ct+1),end='')
             # move the incomming queue messages to the waiting messages, check for old server messages ###
             sleep(1)
             ct += 1
             tmp = self.getMessagesOfType(messageType)
             for x in tmp:
                 v.append(x)
+        print()
         return v, len(v) > self.N/2
 
 
@@ -191,16 +192,16 @@ class Proposer(threading.Thread):
             #else start over
 
         print("Proposer: Waiting for promises...")
-        
+
+        print("Proposer: Waiting for majority promises:  ",end='')
         list_of_messages,promise_result = self.waitForMajorityPromise()
 
         #for t in range(0,timeout):
         #   print("Waiting... %i/%i"%(t+1, timeout))
         #   sleep(1)
 
-        print("Proposer: Done waiting, checking for majority promises")
-
         if not promise_result:
+            print("Proposer: Majority promise not achieved")
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
@@ -237,13 +238,13 @@ class Proposer(threading.Thread):
 
         print("Proposer: Accept messages put in queue!")
 
+        print("Proposer: Waiting for majority ack:  ",end='')
 
         list_of_messages,ack_result = self.waitForMajorityAck()
 
 
-        print("Proposer: Done waiting, checking for majority acks")
-
         if not ack_result:
+            print("Proposer: Majority ack not achieved")
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
@@ -261,8 +262,6 @@ class Proposer(threading.Thread):
 
         self.outQ.put(pickledCommitMess)
         self.lastm = nextm
-
-        print("Proposer: Commit messages put in queue!")
 
         return maxAccNumVal[0], maxAccNumVal[1],True
 

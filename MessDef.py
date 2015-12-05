@@ -67,13 +67,14 @@ def dePickle(netm):
         assert(isinstance(message,NetMess))
         ## load the internal str and de-pickle that:
         if message.accValTxt is not None:
-            print("Textual calendar!")
+            # print("Textual calendar!")
             cg = pCalendar.UserCal.CalGenerator(source="NETWORK").getGen()
             message.accVal = cg(message.accValTxt)
             if(not isinstance(message.accVal,NetMess)):
                 raise "Bad Cal"
         else:
-            print("binary cal")
+            # print("binary cal")
+            pass
 
         return message
     except AssertionError:
