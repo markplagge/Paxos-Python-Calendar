@@ -22,7 +22,7 @@ class udpDataHanlder(socketserver.BaseRequestHandler):
         if isinstance(data, tuple):
             data = data[0]
         sq.inUDP.put(data)
-        print("Got data: " + data.decode())
+        print("Got UDP data")
 
 class thUDPHandler(socketserver.ThreadingMixIn,socketserver.UDPServer):
     pass
