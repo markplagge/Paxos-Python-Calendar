@@ -21,37 +21,37 @@ class Client(threading.Thread):
 
         self.locCalendar = pCalendar.UserCal.Calendar(username=pID)
 
-        inUDP = simplenetwork.serverData.mainServerQueue.inUDP
-        outUDP = simplenetwork.serverData.mainServerQueue.outUDP
+        self.inUDP = simplenetwork.serverData.mainServerQueue.inUDP
+        self.outUDP = simplenetwork.serverData.mainServerQueue.outUDP
 
-        inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
-        outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
+        self.inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
+        self.outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
 
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=outTCP,inQ=inTCP)
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP)
 
 
         #Create your node's Proposer Process
-        propInQ = queue.Queue()
-        propOutQ = queue.Queue()
+        self.propInQ = queue.Queue()
+        self.propOutQ = queue.Queue()
 
         self.clientToPropQ = queue.Queue()
         self.propToClientQ = queue.Queue()
 
-        self.propObj = Paxos.Proposer.Proposer(propInQ,propOutQ,self.clientToPropQ, self.propToClientQ, N= N, ID= pID, ldr=self.ldrObj)
+        self.propObj = Paxos.Proposer.Proposer(self.propInQ,self.propOutQ,self.clientToPropQ, self.propToClientQ, N= N, ID= pID, ldr=self.ldrObj)
         self.propObj.setDaemon(True)
         self.propObj.start()
 
         #Create your node's Acceptor Process
-        acceptInQ = queue.Queue()
-        acceptOutQ = queue.Queue()
-        self.acceptObj = Paxos.Acceptor.Acceptor(outQ = acceptOutQ, inQ = acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
+        self.acceptInQ = queue.Queue()
+        self.acceptOutQ = queue.Queue()
+        self.acceptObj = Paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
         self.acceptObj.setDaemon(True)
         self.acceptObj.start()
 
         #Create your node's Grand Central Dispatch
-        gcdObj = Paxos.GCD.GCD(inQ=inUDP, propQ=propInQ, acceptQ=acceptInQ)
+        gcdObj = Paxos.GCD.GCD(inQ=self.inUDP, propQ=self.propInQ, acceptQ=self.acceptInQ)
         gcdObj.setDaemon(True)
         gcdObj.start()
 
@@ -81,12 +81,13 @@ class Client(threading.Thread):
             elif choice == 2: #Add event to calendar
                 newEvent = addEventParsing(self)
 
-                self.locCalendar.addEntry(newEvent)
+                (succ, _) = self.locCalendar.addEntry(newEvent)
 
-                #Create REQUEST message, send it to the node's proposer
-                rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
+                if succ:
+                    #Create REQUEST message, send it to the node's proposer
+                    rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
-                self.clientToPropQ.put(rqstMess)
+                    self.clientToPropQ.put(rqstMess)
 
 
                 print('------------\n\n')
@@ -113,11 +114,14 @@ class Client(threading.Thread):
             elif choice == 0: #Add test event
                 newEvent = addEventParsing(self,test=True)
 
-                self.locCalendar.addEntry(newEvent)
+                (succ, _) = self.locCalendar.addEntry(newEvent)
 
-                rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
+                if succ:
+                    rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
-                self.clientToPropQ.put(rqstMess)
+                    self.clientToPropQ.put(rqstMess)
+
+                    print("Added Test Event")
 
             time.sleep(1)
 
