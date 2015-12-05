@@ -1,7 +1,7 @@
 
 class NetMess(object):
 
-    def __init__(self, messType="INVALID",recipient = -1, sender = -1 ,m=-1,accNum=-1,accVal="Calendar goes here"):
+    def __init__(self, messType="INVALID",recipient = -1, sender = -1 ,m=-1,accNum=-1,accVal="Calendar goes here", newEvent= "PROPOSAL event"):
         self.messType = messType
         self.m = m
         self.accNum = accNum
