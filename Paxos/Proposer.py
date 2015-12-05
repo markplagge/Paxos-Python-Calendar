@@ -118,8 +118,7 @@ class Proposer(threading.Thread):
         result = None
         try:
             result = m[0]
-            for em in m:
-                self.inQ.put(em)
+
         except:
             result = None
 
