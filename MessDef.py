@@ -6,16 +6,7 @@ from pCalendar.UserCal import Calendar
 ## Calendar additions:
 
 
-def jsonCal(self):
-    self.cal.sort()
-    self.caltxts = list(self.cal)
-    btext = map(lambda i: i.toJSON(), self.caltxts)
-    self.caltxts = list(btext)
-    bigDict = dict(self.__dict__)
-    del (bigDict["cal"])
 
-    js1 = json.dumps(bigDict, indent=4, sort_keys=True)
-    return js1
 
 
 class NetMess(object):
@@ -36,19 +27,29 @@ class NetMess(object):
 
     def pickleMe(self):
         ## pickle the calendar
-        try:
-            assert(isinstance(self.accVal,Calendar))
-            Calendar.jsonCal = jsonCal
-            self.accValTxt = self.accVal.jsonCal()
-
-        except AssertionError:
-            self.accVal = None
-            self.accValTxt = None
-            print("PCKLR Status update - message with no value - info ok")
-        except:
-            print("possible uk er")
+        #try:
+        #    assert(isinstance(self.accVal,Calendar))
+        #    #Calendar.jsonCal = self.accVal.jsonCal()
+        #    self.accValTxt = pickle#self.accVal.jsonCal()
+        #except AssertionError:
+        #    self.accVal = None
+        #    self.accValTxt = None
+        #    print("PCKLR Status update - message with no value - info ok")
+        #except:
+        #    print("possible uk er")
 
         return pickle.dumps(self)
+
+    def __eq__(self, other):
+        if isinstance(other,NetMess):
+            return (self.messType == other.messType and
+                    self.m == other.m and
+                    self.accNum == other.accNum and
+                    self.accVal == other.accVal and
+                    self.recipient == other.recipient and
+                    self.sender == other.sender)
+        else:
+            return False
 
 
 
@@ -66,10 +67,13 @@ def dePickle(netm):
         assert(isinstance(message,NetMess))
         ## load the internal str and de-pickle that:
         if message.accValTxt is not None:
+            print("Textual calendar!")
             cg = pCalendar.UserCal.CalGenerator(source="NETWORK").getGen()
             message.accVal = cg(message.accValTxt)
             if(not isinstance(message.accVal,NetMess)):
                 raise "Bad Cal"
+        else:
+            print("binary cal")
 
         return message
     except AssertionError:

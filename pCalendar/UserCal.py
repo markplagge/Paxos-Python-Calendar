@@ -217,7 +217,17 @@ class Calendar(object):
             f.writelines(js1)
             # print("JS1 ---------- \n" + js1 + "\n----------------------")
         return js1
+    
+    def jsonCal(self):
+        self.cal.sort()
+        self.caltxts = list(self.cal)
+        btext = map(lambda i: i.toJSON(), self.caltxts)
+        self.caltxts = list(btext)
+        bigDict = dict(self.__dict__)
+        del (bigDict["cal"])
 
+        js1 = json.dumps(bigDict, indent=4, sort_keys=True)
+        return js1
     def loadCal(self):
         # file = open(self.fileName, 'r')
         # fdat = file.readlines()
