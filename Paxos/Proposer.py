@@ -201,7 +201,10 @@ class Proposer(threading.Thread):
         print("Proposer: Done waiting, checking for majority promises")
 
         if not promise_result:
-            return False
+            retAccNum= None
+            retAccVal= self.lastCommittedVal
+            retSuccess= False
+            return retAccNum, retAccVal, retSuccess
 
         #Otherwise you can move on now and send accept to all other nodes acceptors
         print("Proposer: Majority promise recieved")
@@ -241,7 +244,10 @@ class Proposer(threading.Thread):
         print("Proposer: Done waiting, checking for majority acks")
 
         if not ack_result:
-            return False
+            retAccNum= None
+            retAccVal= self.lastCommittedVal
+            retSuccess= False
+            return retAccNum, retAccVal, retSuccess
 
         print("Proposer: Majority ack recieved")
 
@@ -258,7 +264,7 @@ class Proposer(threading.Thread):
 
         print("Proposer: Commit messages put in queue!")
 
-        return True
+        return maxAccNumVal[0], maxAccNumVal[1],True
 
 
 
