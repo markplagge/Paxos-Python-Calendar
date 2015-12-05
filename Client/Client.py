@@ -33,8 +33,8 @@ class Client(threading.Thread):
 
 
         #Create your node's Proposer Process
-        self.propInQ = queue.Queue()
-        self.propOutQ = queue.Queue()
+        self.propInQ = self.inUDP
+        self.propOutQ = self.outUDP
 
         self.clientToPropQ = queue.Queue()
         self.propToClientQ = queue.Queue()
@@ -114,9 +114,9 @@ class Client(threading.Thread):
             elif choice == 0: #Add test event
                 newEvent = addEventParsing(self,test=True)
 
-                (succ, _) = self.locCalendar.addEntry(newEvent)
+                (fail, _) = self.locCalendar.addEntry(newEvent)
 
-                if succ:
+                if not fail:
                     rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
                     self.clientToPropQ.put(rqstMess)

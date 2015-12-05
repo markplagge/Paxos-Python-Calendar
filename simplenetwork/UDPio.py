@@ -21,7 +21,7 @@ class udpDataHanlder(socketserver.BaseRequestHandler):
         socket = self.request[1]
         if isinstance(data, tuple):
             data = data[0]
-        sq.inUDP.put(data.decode())
+        sq.inUDP.put(data)
         print("Got data: " + data.decode())
 
 class thUDPHandler(socketserver.ThreadingMixIn,socketserver.UDPServer):
@@ -39,7 +39,7 @@ def udpSendData():
                 destIP =data[1]
                 
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.sendto(bytes(message.encode()),(destIP,port))
+                sock.sendto(bytes(message),(destIP,port))
             else:                      
                 for host in udest:
 
