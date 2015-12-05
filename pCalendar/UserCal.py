@@ -52,7 +52,7 @@ class CalEvent(object):
 
     def __str__(self):
         
-        title = 'Event ID ' + str(self.uid) + ', Title: ' + str(self.eventName) + '\n '
+        title = 'Event ID ' + str(self.uid) + ', Title: ' + str(self.eventName) + ', '
         start = 'Start: ' + str(self.startTS) + ', '
         end = 'End: ' + str(self.endTS) + ', '
         owner = 'Owner: ' + str(self.owner) + ', '
@@ -254,8 +254,11 @@ class Calendar(object):
         #         self.cal.remove(removes)
         #     self.cal.append(calevt)
 
-        print('found %i conflicts'%len(overlaps))
-        self.cal.append(calevt)
+        print('found %i conflicts with local calendar'%len(overlaps))
+        if len(overlaps) > 0:
+            print('Try again!')
+        else:
+            self.cal.append(calevt)
         return isOverlap, overlaps
 
     def removeEntry(self, calevt):
