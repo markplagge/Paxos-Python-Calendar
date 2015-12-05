@@ -37,8 +37,14 @@ def startupThreadedServers():
     print("threads init")
 
 
-def startupServers():
+def startupServers(hostFile):
     startupThreadedServers()
+    if hostFile is not None:
+        procIPs = simplenetwork.serverData.getDests(hostFile)
+        simplenetwork.serverData.tcpDests = procIPs
+        for pid in procIPs:
+            simplenetwork.serverData.udpDests.append(pid)
+
     #loop = asyncio.get_event_loop()
    
     #coro = loop.create_connection(TCPio.TCPServerProtocol,local_addr=("127.0.0.1",simplenetwork.serverData.tcpPort))

@@ -30,7 +30,9 @@ class GCD(threading.Thread):
 
                 if messType == 'PROPOSAL' or messType == 'RESULT' or messType == 'PROMISE' or messType == 'ACK':
                     self.propQ.put(depickledMessage)
+                    print("GCD SENT MESSAGE TO PROPOSER")
 
                      #PREPARE, ACCEPT, COMMIT-> ACCEPTOR
                 elif messType == 'PREPARE' or messType == 'ACCEPT' or messType == 'COMMIT':
                     self.acceptQ.put(depickledMessage)
+                    print("GCD SENT MESSAGE TO ACCEPTOR")

@@ -17,8 +17,8 @@ tcpPort = 8888
 
 myIP = "127.0.0.1"
 
-def getDests():
-    hosts = numpy.loadtxt("hosts.info",dtype='S20', delimiter=",")
+def getDests(filename = "hosts.info"):
+    hosts = numpy.loadtxt(filename,dtype='S20', delimiter=",")
 
     ##OK, how do we know what UUID goes to what server?
     #I'm going to assume that the UUID in a message contains the IP:PORT in a tuple for this.

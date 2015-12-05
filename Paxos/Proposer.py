@@ -16,7 +16,7 @@ timeout = 5 #time to wait for queue to determine if majority has been found
 
 class Proposer(threading.Thread):
 
-    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader()):
+    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader(), timeout = 5):
         """Change q references later on to outQ and inQ equiv"""
         super().__init__()
         self.fromClientQueue = requestInQ
@@ -30,7 +30,7 @@ class Proposer(threading.Thread):
         self.daemon = True
         self.inboundLock = threading.Lock()
         self.lastCommittedVal = None
-
+        self.timeout = timeout
 
 
     def run(self):
@@ -53,13 +53,14 @@ class Proposer(threading.Thread):
                 propCal = self.current_proposal_message.accVal
 
                 isConflict = False
-                for curEvt in curCal.cal:
-                    for propEvt in propCal.cal:
-                        if (curEvt.willEventConflict(propEvt)):
-                            isConflict = True
+                if curCal is not None:
+                    for curEvt in curCal.cal:
+                        for propEvt in propCal.cal:
+                            if (curEvt.willEventConflict(propEvt)):
+                                isConflict = True
+                                break
+                        if isConflict is True:
                             break
-                    if isConflict is True:
-                        break
 
                 if not isConflict:
                     accNum, accVal,success = self.execSynod()
@@ -137,7 +138,7 @@ class Proposer(threading.Thread):
         if self.fromClientQueue.qsize() > 0:
             print("Proposer: Got request from client, forwarding to leader")
             proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
-                                        m=self.chooseNewPropNum(self.lastm), accNum=-1, accVal=self.fromClientQueue.get())
+                                        m=self.chooseNewPropNum(self.lastm), accNum=-1, accVal=self.fromClientQueue.get().accVal)
             self.addToOutQ((proposalM,self.ldr.clIP))
 
 
@@ -157,13 +158,13 @@ class Proposer(threading.Thread):
         ct = 0
         v = []
         while len(v) < self.N/2 and ct < self.timeout:
-            print("Proposer: Waiting... %i/%i"%(ct+1, timeout))
+            print("Proposer: Waiting for majority " )
             # move the incomming queue messages to the waiting messages, check for old server messages ###
             sleep(1)
             ct += 1
             tmp = self.getMessagesOfType(messageType)
             for x in tmp:
-                v.append(tmp)
+                v.append(x)
         return v, len(v) > self.N/2
 
 

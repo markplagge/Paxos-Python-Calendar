@@ -46,7 +46,7 @@ def udpSendData():
                     #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-                    sock.sendto(bytes(data.encode()), (host,port))
+                    sock.sendto(data, (host,port))
         time.sleep(2)
 def udpRun():
     UDPSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
