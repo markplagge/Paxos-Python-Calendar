@@ -231,9 +231,9 @@ class Calendar(object):
         with open(self.mrfn, 'rb') as ctf:
             self = pickle.load(ctf)
 
-        jsLoaded = createCal(fileName=self.hrfn)
-        assert (self == jsLoaded)
-        self = jsLoaded
+        #jsLoaded = createCal(fileName=self.hrfn)
+        #assert (self == jsLoaded)
+        #self = jsLoaded
 
     def addEntry(self, calevt):
         isOverlap = False
