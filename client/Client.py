@@ -73,7 +73,7 @@ class Client(threading.Thread):
             prompt1 = "\n\n1. View your calendar\n"
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
-            prompt4 = "4. Refresh\n"
+            prompt4 = "4. Check the leader\n"
 
             print(prompt1 + prompt2 + prompt3 + prompt4)
             choice = int(input("What would you like to do?\n"))
@@ -118,8 +118,8 @@ class Client(threading.Thread):
 
                 print('------------\n\n')
 
-            elif choice == 4: #Check for RESULTs from proposer
-                print("YOU DID NOTHING YOU DINGBAT")
+            elif choice == 4:
+                print(self.ldrObj.clP)
 
                 print('------------\n\n')
 
