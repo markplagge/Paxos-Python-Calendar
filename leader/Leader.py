@@ -202,7 +202,8 @@ class Leader(threading.Thread):
                     self.no_leader()
     def no_leader(self):
         for ip in self.otherIPs:
-            self.outQ.put((self.ldrMesg,ip))
+            pickledMess = pickle.dumps(self.ldrMesg)
+            self.outQ.put((pickledMess,ip))
 
     
                            
@@ -525,6 +526,8 @@ def main():
 
 #    def checkLive(self):
 #        if not self.isCurrentLeader:
+
+
 #            self.outQ.put(pickle.dumps((QueryMess(self.myIP),self.clIP)))
 #            self.liveQs.append((self.currentTick,self.clIP))
 
