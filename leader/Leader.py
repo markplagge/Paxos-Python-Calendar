@@ -179,6 +179,8 @@ class Leader(threading.Thread):
             if not self.electionInProgress and not gotPingResp:
                 self.election_new()
 
+        self.data_handler_new() # handles all messages
+
         for m in self.electionMessages:
             if m.pid > self.pid: #They are the leader
                 self.clIP = m.sourceIP
@@ -233,6 +235,7 @@ class Leader(threading.Thread):
     ##  if isinstance(m, okMessage):
     ##
     def data_handler_new(self):
+        time.sleep(self.timeout)
         for m in self.inMessages:
             if isinstance(m,PingMessage):
                 self.queryMessages.append(m)
