@@ -235,11 +235,13 @@ class Leader(threading.Thread):
                     
                     cr = self.getReqNum()
                     self.outQ.put(pickle.dumps(LeaderMessage(self.pid,cr,self.myIP,self.myPort)))
+                    self.clIP = "127.0.0.1"
                     while self.liveQs.qsize() > 0 :
                         x = self.liveQs.get()
                         self.liveQs.task_done()
                 else:
                     self.isCurrentLeader = False
+                    self.clIP = m.sourceIP
                     self.gotResponse()
         self.inMessages.clear()
 
