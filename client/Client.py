@@ -34,7 +34,7 @@ class Client(threading.Thread):
 
 
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP)
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,myIP=simplenetwork.serverData.tcpDests[pID])
 
         ##Start up the leader:
         self.ldrObj.daemon = True
