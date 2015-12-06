@@ -42,7 +42,7 @@ class Client(threading.Thread):
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         #TESTING WITHOUT LEADER
-        self.ldrObj.clIP = '129.161.59.87' #'54.174.14.105'
+        self.ldrObj.clIP = '52.91.20.235'
         if self.uID == 1:
             self.ldrObj.isCurrentLeader = True
         else:
