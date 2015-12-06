@@ -3,6 +3,7 @@ import paxos.Acceptor
 import paxos.Proposer
 import paxos.gcd
 import leader.Leader
+import leader.NeilQueueChecker
 import queue
 import simplenetwork
 import pCalendar.UserCal
@@ -32,9 +33,12 @@ class Client(threading.Thread):
         self.inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
         self.outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
+        self.queueChecker = leader.NeilQueueChecker.QueueChecker(self.inTCP)
+        self.queueChecker.daemon = True
+        self.queueChecker.start()
 
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,myIP=simplenetwork.serverData.tcpDests[pID])
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         ##Start up the leader:
         self.ldrObj.daemon = True
