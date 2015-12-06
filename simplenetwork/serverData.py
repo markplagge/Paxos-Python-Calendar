@@ -28,7 +28,7 @@ def getDests(filename = "hosts.info"):
         message_dests[host[0].astype(str)] = str(host[1].astype(str)).strip()
 
     for i in message_dests:
-        udpDests.append(i)
+        udpDests.append(message_dests[i])
     return message_dests
 
 
