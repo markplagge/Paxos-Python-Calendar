@@ -20,7 +20,7 @@ class Client(threading.Thread):
         #     simplenetwork.serverData.udpDests = ["127.0.0.1"]
         #     simplenetwork.serverData.tcpDests["127.0.0.1"] = 8888
 
-        self.timeout = 30
+        self.timeout = 60
 
         svr = simplenetwork.Servers.startupServers(hostFile)
 
@@ -42,8 +42,8 @@ class Client(threading.Thread):
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         #TESTING WITHOUT LEADER
-        self.ldrObj.clIP = '129.161.59.87'
-        if self.uID == 1:
+        self.ldrObj.clIP = '54.174.14.105' #'129.161.59.87'
+        if self.uID == 0:
             self.ldrObj.isCurrentLeader = True
         else:
             self.ldrObj.isCurrentLeader = False
