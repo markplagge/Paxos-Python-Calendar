@@ -38,7 +38,7 @@ class Client(threading.Thread):
         self.queueChecker.start()
 
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.UID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         ##Start up the leader:
         self.ldrObj.daemon = True
