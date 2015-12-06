@@ -250,13 +250,14 @@ class Leader(threading.Thread):
 
     def run(self):
         print("Leader starting!!!")
+        time.sleep(5)
         self.live = threading.Timer(1,self.ttime)
         self.live.start()
         self.elect()
         while(True):
             time.sleep(1)
             if self.running:
-                print("Leader: checkdata()")
+                # print("Leader: checkdata()")
                 self.checkData()
                 self.dataHandler()
                 if self.liveTimeoutCheck() :
