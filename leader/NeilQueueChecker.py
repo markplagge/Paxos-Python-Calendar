@@ -10,4 +10,5 @@ class QueueChecker(threading.Thread):
     def run(self):
         while True:
             if self.queue.qsize() > 0:
-                print(self.queue.qsize())
+                pass
+                # print(self.queue.qsize())
