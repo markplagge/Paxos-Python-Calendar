@@ -95,7 +95,6 @@ class Client(threading.Thread):
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
 
-                self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
 
                 numEvents = len(self.locCalendar.cal)
 
@@ -104,11 +103,11 @@ class Client(threading.Thread):
                 print('------------\n\n')
 
             elif choice == 2: #Add event to calendar
-                newEvent = addEventParsing(self)
+                newEvent = addEventParsing(self,test=False)
 
-                (succ, _) = self.locCalendar.addEntry(newEvent)
+                (fail, _) = self.locCalendar.addEntry(newEvent)
 
-                if succ:
+                if not fail:
                     #Create REQUEST message, send it to the node's proposer
                     rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
@@ -172,9 +171,13 @@ class Client(threading.Thread):
                 response = self.propToClientQ.get()
 
                 if response[1] == None:
-                    self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+                    # self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+                    self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+
 
                 if response[0] == True: #SUCCESS!!!
-                    self.locCalendar = response[1]
+                    # self.locCalendar = response[1]
+                    self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+
             ct += 1
             time.sleep(1)
