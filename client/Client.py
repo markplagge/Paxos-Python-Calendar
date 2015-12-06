@@ -87,8 +87,9 @@ class Client(threading.Thread):
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
             prompt4 = "4. Check the leader\n"
+            prompt5 = "5. Check your ID and IP\n"
 
-            print(prompt1 + prompt2 + prompt3 + prompt4)
+            print(prompt1 + prompt2 + prompt3 + prompt4 + prompt5)
             choice = int(input("What would you like to do?\n"))
 
             if choice == 1: #Print the events in the calendar
@@ -133,6 +134,11 @@ class Client(threading.Thread):
 
             elif choice == 4:
                 print(self.ldrObj.clIP)
+
+                print('------------\n\n')
+
+            elif choice == 5:
+                print('ID: %i, IP: %s'%(int(self.uID), self.ldrObj.myIP))
 
                 print('------------\n\n')
 
