@@ -52,7 +52,7 @@ def startupServers(hostFile):
     
     #coro = loop.create_server(TCPio.TCPServerShort,host="127.0.0.1",port=simplenetwork.serverData.tcpPort,reuse_address=True)
 
-    server = TCPio.thTCPServer(("localhost",simplenetwork.serverData.tcpPort), TCPio.thTCPServerHandler)
+    server = TCPio.thTCPServer(("0",simplenetwork.serverData.tcpPort), TCPio.thTCPServerHandler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
