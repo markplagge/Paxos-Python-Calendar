@@ -178,15 +178,16 @@ class Leader(threading.Thread):
         self.aliveMessages = []
         if not self.electionInProgress and not gotPingResp:
             self.election_new()
-            
+        self.okMessages = []
         for m in self.electionMessages:
             if m.pid > self.pid: #They are the leader
                 self.clIP = m.sourceIP
                 self.isCurrentLeader = False
             else: # m.pid < self.pid:
                 self.election_new()
+        self.electionMessages = []
                 
-
+        time.sleep(self.timeout)
     def election_new(self):
         self.elect()
         while self.electionInProgress:
@@ -205,10 +206,12 @@ class Leader(threading.Thread):
                     self.electionInProgress = False
                     self.clIP = self.myIP
                     self.no_leader()
+        self.okMessages = []
     def no_leader(self):
         for ip in self.otherIPs:
             pickledMess = pickle.dumps(self.ldrMesg)
             self.outQ.put((pickledMess,ip))
+        self.ldrMesg =[]
 
     
                            
