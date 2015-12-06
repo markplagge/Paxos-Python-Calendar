@@ -98,6 +98,8 @@ class Client(threading.Thread):
 
                     self.clientToPropQ.put(rqstMess)
 
+                    print("Client: Waiting for Response")
+                    self.waitForResponse()
 
                 print('------------\n\n')
 
@@ -111,7 +113,8 @@ class Client(threading.Thread):
                 rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
                 self.clientToPropQ.put(rqstMess)
-
+                print("Client: Waiting for Response")
+                self.waitForResponse()
 
                 print('------------\n\n')
 
@@ -132,9 +135,11 @@ class Client(threading.Thread):
 
                     print("Added Test Event")
 
+                    print("Client: Waiting for Response")
+                    self.waitForResponse()
 
-            print("Client: Waiting for Response")
-            self.waitForResponse()
+
+
 
     def waitForResponse(self):
         responseReceived = False
