@@ -60,7 +60,7 @@ class Proposer(threading.Thread):
                 isConflict = doCalendarsConflict(curCal, propCal)
 
                 if not isConflict:
-                    accNum, accVal,success, _ = self.execSynod()
+                    accNum, accVal,success = self.execSynod()
                 else:
                     success = False
                     accNum = None
