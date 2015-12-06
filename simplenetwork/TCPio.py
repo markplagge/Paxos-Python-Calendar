@@ -155,7 +155,7 @@ def tcpSendTh():
                         sock.send(msg)
                     except:
                         lostTCPConnection(msg)
-        time.sleep(2)
+        # time.sleep(2)
 
 def sender(sock, message):
     try:
