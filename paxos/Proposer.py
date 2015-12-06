@@ -186,6 +186,7 @@ class Proposer(threading.Thread):
         #for t in range(0,timeout):
         #   print("Waiting... %i/%i"%(t+1, timeout))
         #   sleep(1)
+        print("Proposer: Recieved %i Promises"%len(list_of_messages))
 
         if not promise_result:
             print("Proposer: Majority promise not achieved")
