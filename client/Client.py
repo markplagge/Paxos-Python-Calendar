@@ -67,7 +67,7 @@ class Client(threading.Thread):
         #Create your node's Acceptor Process
         self.acceptInQ = queue.Queue()
         self.acceptOutQ = self.outUDP
-        self.acceptObj = paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=7777)
+        self.acceptObj = paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort='7777')
         self.acceptObj.setDaemon(True)
         self.acceptObj.start()
 
