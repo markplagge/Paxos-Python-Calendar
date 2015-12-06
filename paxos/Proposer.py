@@ -146,15 +146,23 @@ class Proposer(threading.Thread):
     def waitForMajority(self, messageType):
         ct = 0
         v = []
-        while len(v) < self.N/2 and ct < self.timeout:
-            print("Proposer: Waiting... %i"%len(v))
-            # move the incomming queue messages to the waiting messages, check for old server messages ###
-            sleep(1)
-            ct += 1
-            tmp = self.getMessagesOfType(messageType)
-            for x in tmp:
-                v.append(x)
+        print("Proposer: Waiting the timeout!!")
+        sleep(self.timeout)
+
+        tmp = self.getMessagesOfType(messageType)
+        v = tmp
+
         return v, len(v) > self.N/2
+
+        # while len(v) < self.N/2 and ct < self.timeout:
+        #     print("Proposer: Waiting... %i"%len(v))
+        #     # move the incomming queue messages to the waiting messages, check for old server messages ###
+        #     sleep(1)
+        #     ct += 1
+        #     tmp = self.getMessagesOfType(messageType)
+        #     for x in tmp:
+        #         v.append(x)
+        # return v, len(v) > self.N/2
 
 
     def execSynod(self):
