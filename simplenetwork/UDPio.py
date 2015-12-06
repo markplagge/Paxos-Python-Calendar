@@ -34,6 +34,7 @@ def udpSendData():
     while sndrRun:
         if sq.outUDP.qsize() > 0:
             data = sq.outUDP.get(block=True)
+            print("UDP: Send Data")
             if isinstance(data, tuple):
                 message = data[0]
                 destIP =data[1]
@@ -57,7 +58,7 @@ def udpRun():
 
 def runUDP():
     print("In Main")
-    host, port = "127.0.0.1",serverData.udpPort
+    host, port = "",serverData.udpPort
     udpserver = thUDPHandler((host,port),udpDataHanlder)
     udp_thread = threading.Thread(target=udpserver.serve_forever)
     udp_thread.daemon = True

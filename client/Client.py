@@ -10,6 +10,7 @@ import pCalendar.UserCal
 from PromptHelper import addEventParsing, deleteEventParsing
 from MessDef import NetMess
 import time
+import copy
 
 class Client(threading.Thread):
 
@@ -33,7 +34,7 @@ class Client(threading.Thread):
         self.inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
         self.outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
-        self.queueChecker = leader.NeilQueueChecker.QueueChecker(self.inTCP)
+        self.queueChecker = leader.NeilQueueChecker.QueueChecker(self.inUDP)
         self.queueChecker.daemon = True
         self.queueChecker.start()
 
@@ -162,6 +163,10 @@ class Client(threading.Thread):
                 responseReceived = True
                 response = self.propToClientQ.get()
 
-                self.locCalendar = response[1]
+                if response[1] == None:
+                    self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+
+                if response[0] == True: #SUCCESS!!!
+                    self.locCalendar = response[1]
             ct += 1
             time.sleep(1)
