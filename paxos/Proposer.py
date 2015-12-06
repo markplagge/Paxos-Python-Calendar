@@ -16,7 +16,7 @@ timeout = 5 #time to wait for queue to determine if majority has been found
 
 class Proposer(threading.Thread):
 
-    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader(), timeout = 10):
+    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader(), timeout = 30):
         """Change q references later on to outQ and inQ equiv"""
         super().__init__()
         self.fromClientQueue = requestInQ
