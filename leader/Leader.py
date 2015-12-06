@@ -80,7 +80,7 @@ class Leader(threading.Thread):
         self.inMessages = []
         self.myIP = myIP
         self.myPort = myPort
-        self.isCurrentLeader = True
+        self.isCurrentLeader = False
         self.clIP = "127.0.0.1"
         # self.clP = 7777
         self.live = ""
@@ -132,7 +132,7 @@ class Leader(threading.Thread):
 
     def send_ok(self,m):
         okm = self.okMess
-        self.outQ.put((pickle.dumps(okm),self.clIP))
+        self.outQ.put((pickle.dumps(okm),m.sourceIP))
 
     def send_election_m(self):
         for pid in self.PPIDs:
@@ -166,25 +166,28 @@ class Leader(threading.Thread):
 
         if not self.isCurrentLeader:
             self.ping_leader() # blocks for the timeout time
-        self.data_handler_new() # handles all messages
-        gotPingResp = False
-        #check for ping response message from leader:
-        for m in self.aliveMessages:
-            if m.sourceIP == self.clIP:
-                gotPingResp = True
-                #for blocking style
+            self.data_handler_new() # handles all messages
+            gotPingResp = False
+            #check for ping response message from leader:
+            for m in self.aliveMessages:
+                if m.sourceIP == self.clIP:
+                    gotPingResp = True
+                    #for blocking style
                 
         
-        self.aliveMessages = []
-        if not self.electionInProgress and not gotPingResp:
-            self.election_new()
-        self.okMessages = []
+            self.aliveMessages = []
+            if not self.electionInProgress and not gotPingResp:
+                self.election_new()
+
         for m in self.electionMessages:
             if m.pid > self.pid: #They are the leader
                 self.clIP = m.sourceIP
                 self.isCurrentLeader = False
             else: # m.pid < self.pid:
+                #self.election_new()
+                self.send_ok(m)
                 self.election_new()
+
         self.electionMessages = []
                 
         time.sleep(self.timeout)
@@ -218,7 +221,7 @@ class Leader(threading.Thread):
     def leader_startup(self):
 
        self.isCurrentLeader = True
-       self.elect()
+       self.election_new()
 
 
 
