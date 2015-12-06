@@ -203,6 +203,8 @@ class Proposer(threading.Thread):
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            self.lastm = nextm
+
             # retMajFail = True
             return retAccNum, retAccVal, retSuccess
 
@@ -256,6 +258,8 @@ class Proposer(threading.Thread):
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            self.lastm = nextm
+
             # retMajFail= True
             return retAccNum, retAccVal, retSuccess
 
