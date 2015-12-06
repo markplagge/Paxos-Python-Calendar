@@ -147,6 +147,7 @@ class Proposer(threading.Thread):
         ct = 0
         v = []
         while len(v) < self.N/2 and ct < self.timeout:
+            print("Proposer: Waiting...")
             # move the incomming queue messages to the waiting messages, check for old server messages ###
             sleep(1)
             ct += 1
