@@ -94,6 +94,7 @@ class Client(threading.Thread):
 
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
+                self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
 
 
                 numEvents = len(self.locCalendar.cal)
@@ -170,14 +171,14 @@ class Client(threading.Thread):
                 responseReceived = True
                 response = self.propToClientQ.get()
 
-                if response[1] == None:
-                    # self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
-                    self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
-
-
-                if response[0] == True: #SUCCESS!!!
-                    # self.locCalendar = response[1]
-                    self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+                # if response[1] == None:
+                #     # self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+                #     self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+                #
+                #
+                # if response[0] == True: #SUCCESS!!!
+                #     # self.locCalendar = response[1]
+                #     self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
 
             ct += 1
             time.sleep(1)
