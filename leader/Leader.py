@@ -349,7 +349,7 @@ class Leader(threading.Thread):
             self.election = 1
             self.callID = self.clock.callLater(5, self._proclaim)
 
-    def elect(self, node_id):
+    def _elect(self, node_id):
         """
         Received an "ELECT" message from C{node_id}.
         """
