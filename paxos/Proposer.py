@@ -16,7 +16,7 @@ timeout = 5 #time to wait for queue to determine if majority has been found
 
 class Proposer(threading.Thread):
 
-    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader(), timeout = 5):
+    def __init__(self,inQ,outQ,requestInQ, clientOutQ, N= 1, ID= -1, ldr= Leader(), timeout = 10):
         """Change q references later on to outQ and inQ equiv"""
         super().__init__()
         self.fromClientQueue = requestInQ
@@ -41,7 +41,12 @@ class Proposer(threading.Thread):
 
             # 1. Check for client requests:
                 #2. If we have a request from a client, generate a proposal, and send it to leader
-            self.clientRequestHandler()
+            if self.fromClientQueue.qsize() > 0:
+                m = self.chooseNewPropNum(self.lastm)
+                print("Proposer: Got request from client, forwarding to leader")
+                proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
+                                        m=m, accNum=-1, accVal=self.fromClientQueue.get().accVal)
+                self.addToOutQ((proposalM,self.ldr.clIP))
 
             # 3. Check for proposals in the inProposalQueue
                 # 4. If we got a proposal, run synod
@@ -64,14 +69,14 @@ class Proposer(threading.Thread):
                 print("Head Proposer: Sending Result to requested proposer")
                 #5. Return proposal results to the requesting proposer
                 resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
-                                                sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal)
+                                                sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal, success= success)
                 self.addToOutQ((resultMessage,self.current_proposal_message.sender))
 
             # 6. Check for results in resultQ. If there are any, relay them to client (along with updated calendar)
 
             curResultMessage = self.getMessageOfType("RESULT")
             if curResultMessage is not None:
-                success = curResultMessage.messType
+                success = curResultMessage.success
                 accVal = curResultMessage.accVal
 
                 if success is False:
@@ -127,17 +132,6 @@ class Proposer(threading.Thread):
             self.inQ.put(em)
         return ct
 
-    def clientRequestHandler(self):
-        """1. Check for client requests:
-        #2. If we have a request from a client, generate a proposal, and send it to leader"""
-        if self.fromClientQueue.qsize() > 0:
-            print("Proposer: Got request from client, forwarding to leader")
-            proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
-                                        m=self.chooseNewPropNum(self.lastm), accNum=-1, accVal=self.fromClientQueue.get().accVal)
-            self.addToOutQ((proposalM,self.ldr.clIP))
-
-
-
     def chooseNewPropNum(self,lastm):
         nextm = lastm + self.N
         return nextm
@@ -152,14 +146,23 @@ class Proposer(threading.Thread):
     def waitForMajority(self, messageType):
         ct = 0
         v = []
-        while len(v) < self.N/2 and ct < self.timeout:
-            # move the incomming queue messages to the waiting messages, check for old server messages ###
-            sleep(1)
-            ct += 1
-            tmp = self.getMessagesOfType(messageType)
-            for x in tmp:
-                v.append(x)
+        print("Proposer: Waiting the timeout!!")
+        sleep(self.timeout)
+
+        tmp = self.getMessagesOfType(messageType)
+        v = tmp
+
         return v, len(v) > self.N/2
+
+        # while len(v) < self.N/2 and ct < self.timeout:
+        #     print("Proposer: Waiting... %i"%len(v))
+        #     # move the incomming queue messages to the waiting messages, check for old server messages ###
+        #     sleep(1)
+        #     ct += 1
+        #     tmp = self.getMessagesOfType(messageType)
+        #     for x in tmp:
+        #         v.append(x)
+        # return v, len(v) > self.N/2
 
 
     def execSynod(self):
@@ -192,12 +195,14 @@ class Proposer(threading.Thread):
         #for t in range(0,timeout):
         #   print("Waiting... %i/%i"%(t+1, timeout))
         #   sleep(1)
+        print("Proposer: Recieved %i Promises"%len(list_of_messages))
 
         if not promise_result:
             print("Proposer: Majority promise not achieved")
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            # retMajFail = True
             return retAccNum, retAccVal, retSuccess
 
         #Otherwise you can move on now and send accept to all other nodes acceptors
@@ -250,6 +255,7 @@ class Proposer(threading.Thread):
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            # retMajFail= True
             return retAccNum, retAccVal, retSuccess
 
         print("Proposer: Majority ack recieved")

@@ -10,6 +10,7 @@ import pCalendar.UserCal
 from PromptHelper import addEventParsing, deleteEventParsing
 from MessDef import NetMess
 import time
+import copy
 
 class Client(threading.Thread):
 
@@ -19,7 +20,7 @@ class Client(threading.Thread):
         #     simplenetwork.serverData.udpDests = ["127.0.0.1"]
         #     simplenetwork.serverData.tcpDests["127.0.0.1"] = 8888
 
-        self.timeout = 30
+        self.timeout = 60
 
         svr = simplenetwork.Servers.startupServers(hostFile)
 
@@ -33,7 +34,7 @@ class Client(threading.Thread):
         self.inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
         self.outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
-        self.queueChecker = leader.NeilQueueChecker.QueueChecker(self.inTCP)
+        self.queueChecker = leader.NeilQueueChecker.QueueChecker(self.inUDP)
         self.queueChecker.daemon = True
         self.queueChecker.start()
 
@@ -41,7 +42,7 @@ class Client(threading.Thread):
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         #TESTING WITHOUT LEADER
-        self.ldrObj.clIP = '129.161.59.87'
+        self.ldrObj.clIP = '52.91.20.235'
         if self.uID == 1:
             self.ldrObj.isCurrentLeader = True
         else:
@@ -66,7 +67,7 @@ class Client(threading.Thread):
         #Create your node's Acceptor Process
         self.acceptInQ = queue.Queue()
         self.acceptOutQ = self.outUDP
-        self.acceptObj = paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort=self.ldrObj.myIP)
+        self.acceptObj = paxos.Acceptor.Acceptor(outQ =self.acceptOutQ, inQ =self.acceptInQ, ldr = self.ldrObj, thisIP=self.ldrObj.myIP, thisPort='7777')
         self.acceptObj.setDaemon(True)
         self.acceptObj.start()
 
@@ -86,12 +87,15 @@ class Client(threading.Thread):
             prompt2 = "2. Add an event to your local calendar\n"
             prompt3 = "3. Delete an event from your calendar\n"
             prompt4 = "4. Check the leader\n"
+            prompt5 = "5. Check your ID and IP\n"
 
-            print(prompt1 + prompt2 + prompt3 + prompt4)
+            print(prompt1 + prompt2 + prompt3 + prompt4 + prompt5)
             choice = int(input("What would you like to do?\n"))
 
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
+
+                self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
 
                 numEvents = len(self.locCalendar.cal)
 
@@ -135,6 +139,11 @@ class Client(threading.Thread):
 
                 print('------------\n\n')
 
+            elif choice == 5:
+                print('ID: %i, IP: %s'%(int(self.uID), self.ldrObj.myIP))
+
+                print('------------\n\n')
+
             elif choice == 0: #Add test event
                 newEvent = addEventParsing(self,test=True)
 
@@ -162,6 +171,10 @@ class Client(threading.Thread):
                 responseReceived = True
                 response = self.propToClientQ.get()
 
-                self.locCalendar = response[1]
+                if response[1] == None:
+                    self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+
+                if response[0] == True: #SUCCESS!!!
+                    self.locCalendar = response[1]
             ct += 1
             time.sleep(1)
