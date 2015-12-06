@@ -214,7 +214,7 @@ class Leader(threading.Thread):
         for ip in self.otherIPs:
             pickledMess = pickle.dumps(self.ldrMesg)
             self.outQ.put((pickledMess,ip))
-        self.ldrMesg =[]
+        self.electionMessages =[]
 
     
                            
