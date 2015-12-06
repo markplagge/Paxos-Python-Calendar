@@ -194,7 +194,7 @@ class Leader(threading.Thread):
                 time.sleep(self.timeout)
                 lowestRC = -1
                 newLdr = None
-                if len(self.okMessages > 0) :
+                if len(self.okMessages) > 0 :
                     self.electionInProgress = False
                     break
                 else:
@@ -358,6 +358,7 @@ class Leader(threading.Thread):
         self._start_election()
     def run(self):
         print("Leader starting!!!")
+        time.sleep(30)
         self.election_new()
         while (self.running):
             self.leader_running()
