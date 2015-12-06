@@ -299,6 +299,11 @@ class Learner(object):
         with open(self.fn, mode="wb") as file:
             pickle.dump(self.values, file,protocol=pickle.HIGHEST_PROTOCOL)
 
+        with open("human_"+self.fn, mode="a") as file:
+            for val in self.values:
+                file.write(str(val[0]) + " - " + str(val[1]))
+
+
 
 
 
