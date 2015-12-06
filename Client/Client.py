@@ -153,12 +153,3 @@ class Client(threading.Thread):
                 self.locCalendar = response[1]
             ct += 1
             time.sleep(1)
-
-
-
-
-if __name__ == '__main__':
-    print("Starting")
-    theClient = Client(1)
-
-    theClient.execClient()

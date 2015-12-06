@@ -1,13 +1,15 @@
 TODO:
 
 [x] - Make the learner learn properly
-[ ] - Test Acceptor
+[x] - Test Acceptor
 [x] - Grand Central Dispatch
 		
 [x] - Client and Client interface
-[/]	- main thread
+[x]	- main thread
 
 [ ] - Log stored in stable storage
 [ ] - Client reloads calendar on boot
 
-[ ] - Depickle in MessDef
+[ ] - Fix version numbers in what is sent back to client or remove it
+
+[x] - Depickle in MessDef
