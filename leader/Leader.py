@@ -162,6 +162,7 @@ class Leader(threading.Thread):
     def checkData(self):
         if self.inQ.qsize() > 0:
             itm = self.inQ.get()
+            print(itm)
             obj = pickle.loads(itm)
             self.inMessages.append(obj)
 
