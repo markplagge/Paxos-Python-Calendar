@@ -32,9 +32,10 @@ class Client(threading.Thread):
         self.inTCP = simplenetwork.serverData.mainServerQueue.inTCP #Goes to leader
         self.outTCP = simplenetwork.serverData.mainServerQueue.outTCP #Goes to leader
 
+        something = simplenetwork.serverData.tcpDests
 
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,myIP=simplenetwork.serverData.tcpDests[pID])
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         ##Start up the leader:
         self.ldrObj.daemon = True

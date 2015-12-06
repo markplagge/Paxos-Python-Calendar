@@ -256,10 +256,11 @@ class Leader(threading.Thread):
         while(True):
             time.sleep(1)
             if self.running:
-                
+                print("Leader: checkdata()")
                 self.checkData()
                 self.dataHandler()
                 if self.liveTimeoutCheck() :
+                    print("Leader: starting election")
                     self.elect()
 
             else:
