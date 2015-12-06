@@ -95,6 +95,8 @@ class Client(threading.Thread):
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
 
+                self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+
                 numEvents = len(self.locCalendar.cal)
 
                 for i in range(0,numEvents):
