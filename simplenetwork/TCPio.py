@@ -27,7 +27,7 @@ def server():
 class thTCPServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         
-        data = self.request.recv(10000)
+        data = self.request.recv(5000)
         cur_thread = threading.current_thread()
         serverData.mainServerQueue.inTCP.put(data)
         print("TCP Rcvd data: " + str(data))
@@ -137,14 +137,16 @@ def tcpSendTh():
     while True:
         if(sq.outTCP.qsize() > 0):
             msg = sq.outTCP.get()
+            print("TCP Data sending is  " + str(msg))
             if isinstance(msg,tuple):
                 dest = msg[1]
                 data = msg[0]
                 try:
                     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
                     sock.connect((dest,serverData.tcpPort))
-                    sock.send(data.encode())
+                    sock.send(data)
                 except:
+                    print(" error in single")
                     lostTCPConnection(msg)
             else:
                 ##broadcast
@@ -154,6 +156,7 @@ def tcpSendTh():
                         sock.connect((serverData.tcpDests[dest],serverData.tcpPort))
                         sock.send(msg)
                     except:
+                        print("error in bcast")
                         lostTCPConnection(msg)
         # time.sleep(2)
 
