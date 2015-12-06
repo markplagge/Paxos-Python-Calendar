@@ -45,7 +45,7 @@ class Leader(threading.Thread):
     isCurrentLeader = True
     electionInProgress = False
     def __init__(self, outQ = queue.Queue(), inQ = queue.Queue(),
-                 pid = 0, myIP="127.0.0.1", myPort=8888,timeout=5,tickTime=1, **kwargs):
+                 pid = 0, myIP="127.0.0.1", myPort=8888,timeout=30,tickTime=1, **kwargs):
         super().__init__()
         self.outQ = outQ
         self.inQ = inQ
@@ -145,7 +145,7 @@ class Leader(threading.Thread):
                     
                     cr = self.getReqNum()
                     self.outQ.put(pickle.dumps(LeaderMessage(self.pid,cr,self.myIP,self.myPort)))
-                    self.clIP = "127.0.0.1"
+                    self.clIP = self.myIP
                     while self.liveQs.qsize() > 0 :
                         x = self.liveQs.get()
                         self.liveQs.task_done()
