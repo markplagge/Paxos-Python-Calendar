@@ -39,7 +39,7 @@ class Client(threading.Thread):
         ##Start up the leader:
         self.ldrObj.daemon = True
         self.ldrObj.start()
-        self.ldrObj.clIP = '45.47.149.217'
+        # self.ldrObj.clIP = '45.47.149.217'
 
         #Create your node's Proposer Process
         self.propInQ = queue.Queue()
