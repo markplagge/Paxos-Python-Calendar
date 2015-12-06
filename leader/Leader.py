@@ -53,7 +53,7 @@ class Leader(threading.Thread):
                  inQ = queue.Queue(),
                  pid = 0, myIP="127.0.0.1",
                  myPort=8888, otherPIDs = [], otherIPs = [],
-                 timeout=30,tickTime=1, **kwargs):
+                 timeout=10,tickTime=1, **kwargs):
         super().__init__()
 
         self.s = "DOWN"
@@ -200,7 +200,7 @@ class Leader(threading.Thread):
                 else:
                     #we did not get an ok from a pid less than us, we are now the leader:
                     self.no_leader()
-    def noleader(self):
+    def no_leader(self):
         for ip in self.otherIPs:
             self.outQ.put((self.ldrMesg,ip))
 
