@@ -102,6 +102,8 @@ class Leader(threading.Thread):
         self.electionMessages = []
         self.okMessages = []
         self.aliveMessages = []
+
+        # highestIP = self.higherPID_IPS[str(len(self.otherPIDs)-1)]
     @property
     def okMess(self):
         return OkMess(self.pid,self.pid,self.myIP,self.myPort)
@@ -198,7 +200,10 @@ class Leader(threading.Thread):
                     self.electionInProgress = False
                     break
                 else:
-                    #we did not get an ok from a pid less than us, we are now the leader:
+                    #we did not get an ok at all, we are now the leader:
+                    self.isCurrentLeader = True
+                    self.electionInProgress = False
+                    self.clIP = self.myIP
                     self.no_leader()
     def no_leader(self):
         for ip in self.otherIPs:
