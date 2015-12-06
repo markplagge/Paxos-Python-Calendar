@@ -119,7 +119,7 @@ class Client(threading.Thread):
                 print('------------\n\n')
 
             elif choice == 4:
-                print(self.ldrObj.clP)
+                print(self.ldrObj.clIP)
 
                 print('------------\n\n')
 
