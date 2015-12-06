@@ -65,6 +65,42 @@ class Leader(threading.Thread):
         self.reqNum = 0
         self.lock = threading.Lock()
         self.running = True
+    def leadership(self):
+        import simplenetwork
+
+        if self.clIP != self.myIP:
+            pm = PingMessage(self.pid,self.pid,self.clIP,self.myPort)
+
+            self.outQ.put((pm,self.clIP))
+            time.sleep(10)
+            leaderAlive = False
+            while self.inQ.qsize() > 0:
+                itm = self.inQ.get()
+
+                obj = pickle.loads(itm)
+                if isinstance(obj, OkMess):
+                    leaderAlive = True
+                    while self.inQ.qsize() > 0:
+                        self.inQ.get()
+
+                if isinstance(obj, LeaderMessage):
+                    if self.pid > obj.pid:
+                        self.outQ.put(LeaderMessage(pid=self.pid,num=self.pid,ip=self.myIP,port=self.myPort),obj.sourceIP)
+                        self.clIP = self.myIP
+                        leaderAlive = True
+                    else:
+                        self.clIP = obj.sourceIP
+                        leaderAlive = True
+
+                if not leaderAlive:
+                    for pid in simplenetwork.serverData.tcpDests:
+                        if pid < self.pid:
+                            self.outQ.put((LeaderMessage(pid=self.pid, num=self.pid, ip=self.myIP,port = self.myPort),
+                                           simplenetwork.serverData.tcpDests[pid]))
+
+
+
+
 
     def checkData(self):
         if self.inQ.qsize() > 0:
