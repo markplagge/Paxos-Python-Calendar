@@ -9,8 +9,8 @@ import sys
 import pickle
 import asyncio
 import time
-from twisted.internet import task
-from twisted.trial import unittest
+# from twisted.internet import task
+# from twisted.trial import unittest
 
 class LeaderSuper(object):
     def __init__(self, pid,num,ip,port):
@@ -169,7 +169,7 @@ class Leader(threading.Thread):
         #check for ping response message from leader:
         for m in self.aliveMessages:
             if m.sourceIP == self.clIP:
-                gotPingResp = true
+                gotPingResp = True
                 #for blocking style
                 
         
@@ -222,7 +222,7 @@ class Leader(threading.Thread):
     ##
     def data_handler_new(self):
         for m in self.inMessages:
-            if isinstance(m,QueryMess):
+            if isinstance(m,PingMessage):
                 self.queryMessages.append(m)
             elif isinstance(m,OkMess):
                 self.okMessages.append(m)
@@ -247,7 +247,7 @@ class Leader(threading.Thread):
     def checkLive(self):
         if not self.isCurrentLeader and self.liveQs.qsize() == 0:
             rq = self.getReqNum()
-            qm = QueryMess(self.pid, rq,self.myIP,self.myPort)
+            qm = PingMessage(self.pid, rq,self.myIP,self.myPort)
             self.outQ.put((pickle.dumps(qm),self.clIP))
             self.liveQs.put((self.currentTick,self.clIP))
 
@@ -261,7 +261,7 @@ class Leader(threading.Thread):
 
     def dataHandler(self):
         for m in self.inMessages:
-            if isinstance(m,QueryMess):
+            if isinstance(m,PingMessage):
                 self.okResp(m.sourceIP)
             elif isinstance(m,OkMess):
                 lt = []
@@ -299,17 +299,17 @@ class Leader(threading.Thread):
         self.known.remove(node_id)
         if self.master_id == node_id:
             self._start_election()
-    def _proclaim(self):
-        for nid in self.known:
-            self.transport.send(node_id, 'leader', self.this_id)
-        self.state = 'leader'
-        self.master_id = self.this_id
-        self.service.setUp()
+    # def _proclaim(self):
+    #     for nid in self.known:
+    #         self.transport.send(node_id, 'leader', self.this_id)
+    #     self.state = 'leader'
+    #     self.master_id = self.this_id
+    #     self.service.setUp()
 
-    def _restart_election(self):
-        self.callID =None
-        self.election = 0
-        self._start_election()
+    # def _restart_election(self):
+    #     self.callID =None
+    #     self.election = 0
+    #     self._start_election()
 
     def shot_down(self,node_id):
         assert node_id > self.this_id

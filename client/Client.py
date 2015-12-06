@@ -38,19 +38,31 @@ class Client(threading.Thread):
         self.queueChecker.daemon = True
         self.queueChecker.start()
 
+
+        pidDict = simplenetwork.serverData.tcpDests
+
+        pidList = []
+        for key in pidDict:
+            pidList.append(key)
+
+        nodeIPs = []
+        for key in pidDict:
+            nodeIPs.append(pidDict[key])
+
+
         #Create your node's Leader Process
-        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
+        self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID,otherPIDs=pidList, otherIPs=nodeIPs, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         #TESTING WITHOUT LEADER
-        self.ldrObj.clIP = '52.91.20.235'
-        if self.uID == 1:
-            self.ldrObj.isCurrentLeader = True
-        else:
-            self.ldrObj.isCurrentLeader = False
+        # self.ldrObj.clIP = '52.91.20.235'
+        # if self.uID == 1:
+        #     self.ldrObj.isCurrentLeader = True
+        # else:
+        #     self.ldrObj.isCurrentLeader = False
 
         ##Start up the leader:
         self.ldrObj.daemon = True
-        # self.ldrObj.start()
+        self.ldrObj.start()
         # self.ldrObj.clIP = '45.47.149.217'
 
         #Create your node's Proposer Process
