@@ -139,7 +139,7 @@ class Proposer(threading.Thread):
 
 
     def chooseNewPropNum(self,lastm):
-        nextm = lastm + str(self.N)
+        nextm = lastm + self.N
         return nextm
 
 
