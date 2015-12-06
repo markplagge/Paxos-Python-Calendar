@@ -12,7 +12,7 @@ import time
 
 class Client(threading.Thread):
 
-    def __init__(self,hosts, N=1, pID=1, hostFile=None):
+    def __init__(self, N=1, pID=1, hostFile=None):
         super().__init__()
         if hostFile is None:
             simplenetwork.serverData.udpDests = ["127.0.0.1"]
