@@ -43,17 +43,17 @@ def udpSendData():
                 sock.sendto(bytes(message),(destIP,port))
             else:                      
                 for host in udest:
-
+                    print("UDP SENDING TO: %s"%host)
                     #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-                    sock.sendto(data, (host,port))
+                    sock.sendto(bytes(data), (host,port))
         time.sleep(2)
 def udpRun():
     UDPSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     UDPSock.bind(("",serverData.udpPort))
     while True:
-        data,addr = UDPSock.recvfrom(5098)
+        data,addr = UDPSock.recvfrom(7777)
         print(data.strip())
 
 def runUDP():
