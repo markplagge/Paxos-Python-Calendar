@@ -15,9 +15,9 @@ class Client(threading.Thread):
 
     def __init__(self, N=1, pID=1, hostFile=None):
         super().__init__()
-        if hostFile is None:
-            simplenetwork.serverData.udpDests = ["127.0.0.1"]
-            simplenetwork.serverData.tcpDests["127.0.0.1"] = 8888
+        # if hostFile is None:
+        #     simplenetwork.serverData.udpDests = ["127.0.0.1"]
+        #     simplenetwork.serverData.tcpDests["127.0.0.1"] = 8888
 
         self.timeout = 30
 
@@ -40,9 +40,16 @@ class Client(threading.Thread):
         #Create your node's Leader Process
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
+        #TESTING WITHOUT LEADER
+        self.ldrObj.clIP = '129.161.59.87'
+        if self.uID == 1:
+            self.ldrObj.isCurrentLeader = True
+        else:
+            self.ldrObj.isCurrentLeader = False
+
         ##Start up the leader:
         self.ldrObj.daemon = True
-        self.ldrObj.start()
+        # self.ldrObj.start()
         # self.ldrObj.clIP = '45.47.149.217'
 
         #Create your node's Proposer Process

@@ -42,8 +42,7 @@ class Leader(threading.Thread):
     """Leader represents the leadership role in the program. It
     will poll other servers and ask them for information. It also
     checks to see if TCP data has arrived, and if so """
-    isCurrentLeader = True
-    electionInProgress = False
+
     def __init__(self, outQ = queue.Queue(), inQ = queue.Queue(),
                  pid = 0, myIP="127.0.0.1", myPort=8888,timeout=30,tickTime=1, **kwargs):
         super().__init__()
@@ -55,9 +54,9 @@ class Leader(threading.Thread):
         self.inMessages = []
         self.myIP = myIP
         self.myPort = myPort
-        self.isLeader = True
+        self.isCurrentLeader = True
         self.clIP = "127.0.0.1"
-        self.clP = 7777
+        # self.clP = 7777
         self.live = ""
         self.currentTick = 0
         self.timeout = timeout
@@ -65,6 +64,7 @@ class Leader(threading.Thread):
         self.reqNum = 0
         self.lock = threading.Lock()
         self.running = True
+        self.electionInProgress = False
     def leadership(self):
         import simplenetwork
 
