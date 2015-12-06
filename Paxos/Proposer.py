@@ -52,15 +52,7 @@ class Proposer(threading.Thread):
                 curCal = self.lastCommittedVal
                 propCal = self.current_proposal_message.accVal
 
-                isConflict = False
-                if curCal is not None:
-                    for curEvt in curCal.cal:
-                        for propEvt in propCal.cal:
-                            if (curEvt.willEventConflict(propEvt)):
-                                isConflict = True
-                                break
-                        if isConflict is True:
-                            break
+                isConflict = doCalendarsConflict(curCal, propCal)
 
                 if not isConflict:
                     accNum, accVal,success = self.execSynod()
@@ -69,12 +61,14 @@ class Proposer(threading.Thread):
                     accNum = None
                     accVal = self.lastCommittedVal
 
+                print("Head Proposer: Sending Result to requested proposer")
                 #5. Return proposal results to the requesting proposer
                 resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
                                                 sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal)
                 self.addToOutQ((resultMessage,self.current_proposal_message.sender))
 
             # 6. Check for results in resultQ. If there are any, relay them to client (along with updated calendar)
+
             curResultMessage = self.getMessageOfType("RESULT")
             if curResultMessage is not None:
                 success = curResultMessage.messType
@@ -84,7 +78,9 @@ class Proposer(threading.Thread):
                     print("Proposer: paxos Failed, returning updated calendar to client")
                 elif success is True:
                     print("Proposer: paxos Success, returning updated calendar to client")
-                self.toClientQueue.put(success, accVal)
+
+                print("Proposer: Relaying RESULT(%s,%s) to client"%(success,type(accVal)))
+                self.toClientQueue.put((success, accVal))
 
 
     def addToOutQ(self, message):
@@ -112,7 +108,7 @@ class Proposer(threading.Thread):
             self.inQ.put(em)
         return list(rv)
 
-
+    #TODO: WOAH WTF, YOU GET ALL MESSAGES OF A TYPE AND THEN TRASH ALL BUT THE FIRST ONE?????
     def getMessageOfType(self, messageType):
         m  = self.getMessagesOfType(messageType)
         result = None
@@ -217,15 +213,24 @@ class Proposer(threading.Thread):
         #         maxAccNumVal = (tempNum, tempMess.accVal)
 
 
-        maxAccNumVal = (-1, "")
+        maxAccVal = None
+        maxAccNum = -1
         for mess in list_of_messages:
-            if mess.accNum > maxAccNumVal[0]:
-                maxAccNumVal = (mess.accNum, mess.accVal)
+            if mess.accNum > maxAccNum:
+                maxAccVal = mess.accVal
 
+        areAllNone = True
+        for mess in list_of_messages:
+            if mess.accVal != None:
+                areAllNone = False
+                break
+
+        if areAllNone:
+            maxAccVal = self.current_proposal_message.accVal
 
         print("Proposer: Sending accept messages...")
 
-        acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        acceptMess = MessDef.NetMess(messType = "ACCEPT", sender = self.ldr.myIP, m = nextm, accVal = maxAccVal)
         pickledAcceptMess = acceptMess.pickleMe()
 
         self.outQ.put(pickledAcceptMess)
@@ -254,17 +259,24 @@ class Proposer(threading.Thread):
 
         print("Proposer: Sending commit messages...")
 
-        commitMess = MessDef.NetMess(messType = "COMMIT", sender = self.ldr.myIP, m = nextm, accVal = maxAccNumVal[1])
+        commitMess = MessDef.NetMess(messType = "COMMIT", sender = self.ldr.myIP, m = nextm, accVal = maxAccVal)
         pickledCommitMess = commitMess.pickleMe()
 
         self.outQ.put(pickledCommitMess)
         self.lastm = nextm
 
-        return maxAccNumVal[0], maxAccNumVal[1],True
+        return nextm, maxAccVal,True
 
 
-
-
+def doCalendarsConflict(curCal, propCal):
+    isConflict = False
+    if curCal is not None:
+        for curEvt in curCal.cal:
+            for propEvt in propCal.cal:
+                if (curEvt.willEventConflict(propEvt)):
+                    isConflict = True
+                    return isConflict
+    return isConflict
 
 
 

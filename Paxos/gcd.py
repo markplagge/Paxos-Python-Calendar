@@ -14,7 +14,7 @@ class GCD(threading.Thread):
     def run(self):
         while 'pigs' != 'can fly':
             if self.inQ.qsize() > 0:
-                print("GCD: Recieved a message... ")
+
                 #You have a message!!
                 pickledMessage = self.inQ.get()
 

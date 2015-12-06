@@ -106,6 +106,8 @@ class Acceptor(threading.Thread):
         outMess = MSG(messType="PROMISE", recipient = opmsg.sender, sender = self.myIP,
                       m=opmsg.accNum, accNum=self.promiseN, accVal=pkl)
 
+        print("Acceptor: Sending Promise(%i, %s)"%(self.promiseN,type(pkl)))
+
         ##send message directly to the proposer we got it from
         self.outQ.put((outMess.pickleMe(), opmsg.sender))
 
@@ -125,6 +127,8 @@ class Acceptor(threading.Thread):
         message.recipient = message.sender
         message.sender = self.myIP
         message.accVal = self.acceptedV
+
+        print("Acceptor: Sending Ack(%i %s)"%(message.accNum, type(message.accVal)))
         self.outQ.put(message.pickleMe())
 
 
@@ -140,9 +144,8 @@ class Acceptor(threading.Thread):
         m = message.m
 
         if(self.promiseN <= m ):
-
-            self.newPromise(message)
             self.promiseN = m
+            self.newPromise(message)
         else:
             self.nackPromise(message)
 
@@ -154,7 +157,7 @@ class Acceptor(threading.Thread):
 
         #TODO: Check that M is the proper value here, not message.accN or whatever
         if self.promiseN <= message.m:
-            self.promiseN = message.accVal
+            # self.promiseN = message.accVal #What was the point of this....
             self.acceptedV = message.accVal
             self.promiseN = message.m
 
@@ -165,7 +168,7 @@ class Acceptor(threading.Thread):
         response = self.learner.gotCommit(message)
 
         #self.learner.update(message.accVal, self.acceptedN)
-        self.outQ.put((response[0].pickleMe(),response[1])) #destroys the message
+        # self.outQ.put((response[0].pickleMe(),response[1])) #destroys the message
         ##MESSAGE IS LERN'D
 
     def extractMessage(self,message):

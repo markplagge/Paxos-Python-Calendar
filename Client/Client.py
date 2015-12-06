@@ -18,6 +18,7 @@ class Client(threading.Thread):
             simplenetwork.serverData.udpDests = ["127.0.0.1"]
             simplenetwork.serverData.tcpDests["127.0.0.1"] = 8888
 
+        self.timeout = 30
 
         svr = simplenetwork.Servers.startupServers(hostFile)
 
@@ -131,9 +132,22 @@ class Client(threading.Thread):
 
                     print("Added Test Event")
 
-            time.sleep(30)
 
+            print("Client: Waiting for Response")
+            self.waitForResponse()
 
+    def waitForResponse(self):
+        responseReceived = False
+        ct = 0
+        while responseReceived == False and ct < self.timeout:
+            if self.propToClientQ.qsize() > 0:
+                print("Client: Response Recieved!")
+                responseReceived = True
+                response = self.propToClientQ.get()
+
+                self.locCalendar = response[1]
+            ct += 1
+            time.sleep(1)
 
 
 
