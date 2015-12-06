@@ -27,7 +27,7 @@ def server():
 class thTCPServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
         
-        data = self.request.recv(10000).decode()
+        data = self.request.recv(10000)
         cur_thread = threading.current_thread()
         serverData.mainServerQueue.inTCP.put(data)
         print("TCP Rcvd data: " + str(data))
@@ -134,27 +134,29 @@ def lostTCPConnection(data):
     sq.outTCP.put(data)
     
 def tcpSendTh():
-    if(sq.outTCP.qsize() > 0):
-        msg = sq.outTCP.get()
-        if isinstance(msg,tuple):
-            dest = msg[1]
-            data = msg[0]
-            try:
-                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                sock.connect((dest,serverData.tcpPort))
-                sock.send(data.encode())
-            except:
-                lostTCPConnection(msg)
-        else:
-            ##broadcast
-            for dest in serverData.tcpDests:
-                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    while True:
+        if(sq.outTCP.qsize() > 0):
+            msg = sq.outTCP.get()
+            if isinstance(msg,tuple):
+                dest = msg[1]
+                data = msg[0]
                 try:
+                    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
                     sock.connect((dest,serverData.tcpPort))
-                    sock.send(msg.encode())
+                    sock.send(data.encode())
                 except:
                     lostTCPConnection(msg)
-    threading.Timer(1.5,tcpSendTh).start()
+            else:
+                ##broadcast
+                for dest in serverData.tcpDests:
+                    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                    try:
+                        sock.connect((serverData.tcpDests[dest],serverData.tcpPort))
+                        sock.send(msg)
+                    except:
+                        lostTCPConnection(msg)
+        time.sleep(2)
+
 def sender(sock, message):
     try:
         sock.send(message.encode())

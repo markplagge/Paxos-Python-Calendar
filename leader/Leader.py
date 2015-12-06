@@ -33,100 +33,7 @@ class OkMess(PingMessage):
 class QueryMess(PingMessage):
     pass
 
-class LeaderAs(object):
-    isCurrentLeader = True
-    electionInProgress = False
-    def __init__(self,loop, outQ = queue.Queue(), inQ = queue.Queue(),
-                 pid = 0, myIP="127.0.0.1", myPort=8888,timeout=5,tickTime=1):
-        
-        self.outQ = outQ
-        self.inQ = inQ
-        self.pid = pid
-        self.daemon = True
-        self.inMessages = []
-        self.myIP = myIP
-        self.myPort = myPort
-        
-        self.clIP = "127.0.0.1"
-        self.clP = 7777
-        self.live = ""
-        self.currentTick = 0
-        self.timeout = timeout
-        self.tickTime = tickTime
-        self.reqNum = 0
-        self.lock = threading.Lock()
-        self.running = asyncio.Event()
-        self.running.set()
-        self.discEvent = asyncio.Event(loop = loop)
-        self.electionInProgress = asyncio.Event(loop = loop)
-        self.loop = loop
-    def checkData(self):
-        if self.inQ.qsize() > 0:
-            itm = self.inQ.get()
-            obj = pickle.loads(itm)
-            self.inMessages.append(obj)
-    def getReqNum(self):
-        with self.lock:
-            x = self.reqNum
-            self.reqNum += 1
-        return x
 
-    def elect(self):
-        self.electionInProgress.set()
-        rq = self.getReqNum()
-        self.outQ.put(pickle.dumps(LeaderMessage(self.pid,rq,self.myIP,self.myPort),protocol=pickle.HIGHEST_PROTOCOL))
-        #self.electTimer = threading.Timer(self.timeout,self.leadershipCheck).start()
-        self.electTimer = self.loop.call_later(self.timeout,self.electionTimeout)
-
-    def setLeader(self, leaderIP = None):
-        if leaderIP is None:
-            self.isCurrentLeader = True
-            self.clIP = self.myIP
-        else:
-            self.isCurrentLeader = False
-            self.clIP = leaderIP
-       
-    def electionTimeout(self):
-        #called after the election timeout
-        self.electionInProgress.clear()
-        self.isCurrentLeader = True
-        self.setLeader()
-    
-    def dataHandler(self):
-        for m in self.inMessages:
-            if isinstance(m,LeaderMessage):
-                if m.pid < self.pid:
-                    self.isCurrentLeader = True
-                    cr = self.getReqNum()
-                    self.outQ.put(pickle.dumps(LeaderMessage(self.pid,cr,self.myIP,self.myPort)))
-                    while self.liveQs.qsize() > 0 :
-                        x = self.liveQs.get()
-                        self.liveQs.task_done()
-                else:
-                    self.isCurrentLeader = False
-
-        self.inMessages.clear()
-
-
-    @asyncio.coroutine
-    def run(self):
-        print("runnning leader")
-        self.elect()
-        while True:
-            self.running.wait()
-            self.checkData()
-            self.dataHandler()
-        
-            if self.discEvent.is_set():
-                self.discEvent.clear()
-                self.elect()
-            
-            yield from asyncio.sleep(2)
-
-
-
-    
-    
 
 
 class Leader(threading.Thread):
@@ -176,7 +83,7 @@ class Leader(threading.Thread):
         self.currentTick += 1
         if self.currentTick % self.timeout == 0:
             self.checkLive()
-        self.live = threading.Timer(self.tickTime,self.ttime).start()
+        #self.live = threading.Timer(self.tickTime,self.ttime).start()
         
     def imTheLeaderNow(self):
         self.isCurrentLeader = True
@@ -251,17 +158,23 @@ class Leader(threading.Thread):
 
     def run(self):
         print("Leader starting!!!")
-        self.live = threading.Timer(1,self.ttime)
-        self.live.start()
+
+        #self.live = threading.Timer(1,self.ttime)
+        #self.live.start()
         self.elect()
         while(True):
-            time.sleep(1)
+            time.sleep(self.tickTime)
             if self.running:
-                
+                self.ttime()
                 self.checkData()
                 self.dataHandler()
                 if self.liveTimeoutCheck() :
-                    self.elect()
+                    if self.electTimer is None:
+                        self.elect()
+                    else:
+                        print("t174 - timer called when it exists?")
+                        self.electTimer.cancel()
+                        self.elect()
 
             else:
                 if self.live is not None:
@@ -360,55 +273,6 @@ def main():
             if leader.isCurrentLeader:
                 print("leader " + str(leader.pid) + " thinks it is leader.")
         srvr.fakeSend()
-
-@asyncio.coroutine
-def menu(leaders,srvr,loop): 
-    iz = ""
-    iz = input("Continue, or kill/start leader #")
-    if iz.isdigit() and int(iz) < len(leaders):
-        tn = int(iz)
-        leaders[tn].running = not leaders[tn].running
-        for i in range(len(leaders)):
-            if i is not tn:
-                leaders[i].discEvent.set()
-    i = 0
-    for inq,outq in srvr.queues:
-        print("Srvr q " + str(i) + " is: In:" + pq(inq) + " Out: " + pq(outq))
-        i += 1
-    for leader in leaders:
-        if leader.isCurrentLeader:
-            print("leader " + str(leader.pid) + " thinks it is leader.")
-    srvr.fakeSend()   
-    yield from asyncio.sleep(2)
-    yield from menu(leaders,srvr,loop)
-  
-def asMain():
-    n = 2
-    srvr = fakeServer(n)
-    
-    if sys.platform == 'win32':
-        loop = asyncio.ProactorEventLoop()
-        asyncio.set_event_loop(loop)
-
-    loop = asyncio.get_event_loop()
-    leaders = []
-    tasks = []
-    
-    for n in range(n):
-        leaders.append(LeaderAs(loop,myIP="localhost" + str(n),pid=n, inQ=srvr.inQs[n], outQ=srvr.outQs[n]))
-    for l in leaders:
-        tasks.append(asyncio.ensure_future(l.run()))
-        #asyncio.run_coroutine_threadsafe(l.run,loop)
-    #loop.run_until_complete(asyncio.wait(tasks))
-    loop.create_task(menu(leaders,srvr,loop))
-    loop.run_forever()
-    loop.close()
-    
-        
-
-if __name__ == "__main__":
-    #sys.exit(int(main() or 0))
-    asMain()
 
 
 
