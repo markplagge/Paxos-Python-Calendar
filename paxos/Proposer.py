@@ -23,7 +23,7 @@ class Proposer(threading.Thread):
         self.toClientQueue = clientOutQ
         self.outQ = outQ
         self.inQ = inQ
-        self.N = N
+        self.N = int(N)
         self.ldr = ldr
         self.ID = ID
         self.lastm = self.ID
@@ -139,7 +139,7 @@ class Proposer(threading.Thread):
 
 
     def chooseNewPropNum(self,lastm):
-        nextm = lastm + self.N
+        nextm = lastm + str(self.N)
         return nextm
 
 

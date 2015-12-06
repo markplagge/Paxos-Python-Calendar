@@ -141,7 +141,7 @@ class Acceptor(threading.Thread):
         assert(isinstance(message,MessDef.NetMess))
         #Neil pointed out that we might get repeated messages... so I've got a nice if then else chain here
         #First, we assume that the proposal id is too large then smaller. dupes should fall through?
-        m = message.m
+        m = int(message.m)
 
         if(self.promiseN <= m ):
             self.promiseN = m

@@ -42,8 +42,8 @@ def startupServers(hostFile):
     if hostFile is not None:
         procIPs = simplenetwork.serverData.getDests(hostFile)
         simplenetwork.serverData.tcpDests = procIPs
-        for pid in procIPs:
-            simplenetwork.serverData.udpDests.append(pid)
+#        for pid in procIPs:
+#            simplenetwork.serverData.udpDests.append(pid)
 
     #loop = asyncio.get_event_loop()
    
