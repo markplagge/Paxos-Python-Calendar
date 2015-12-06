@@ -56,10 +56,11 @@ def startupServers(hostFile):
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
+    startTCPSender()
     print("TCP Finished")
     return server
 
-def startSender():
+def startTCPSender():
     #loop = asyncio.get_event_loop()
     #coro = asyncio.ensure_future(TCPio.sendTCPAll(loop))
     #loop.run_in_executor(executor=None,func=TCPio.sendTCPAll(loop))
