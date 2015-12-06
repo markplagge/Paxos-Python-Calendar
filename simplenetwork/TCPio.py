@@ -131,7 +131,7 @@ def main():
 ##TCP Clients (send data):
 def lostTCPConnection(data):
     print("A TCP SEND ERROR HAS OCCURED")
-    # sq.outTCP.put(data)
+    sq.outTCP.put(data)
     
 def tcpSendTh():
     while True:
