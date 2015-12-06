@@ -230,6 +230,8 @@ class Leader(threading.Thread):
                     
                 
             elif isinstance(m,LeaderMessage):
+                print("m.pid",m.pid,"self.pid",self.pid)
+
                 if m.pid < self.pid:
                     self.isCurrentLeader = True
                     
