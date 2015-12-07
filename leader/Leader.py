@@ -13,28 +13,43 @@ import time
 # from twisted.trial import unittest
 
 class LeaderSuper(object):
-    def __init__(self, pid,num,ip,port):
+    def __init__(self, pid,num,ip,port,type):
         self.pid = pid
         self.reqNum = num
         self.sourceIP = ip
         self.sourcePort = port
+        self.type=type
+        
+        
 
     def __str__(self):
         return "Message from pid " + str(self.pid) + ", IP: " + str(self.sourceIP)
 
 class LeaderMessage(LeaderSuper):
-    pass
+    def __init__(self, pid,num,ip,port):
+
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+    
 
 
 class PingMessage(LeaderSuper):
+    def __init__(self, pid,num,ip,port):
+
+        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
+        self.type = "PING"
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
 
-class OkMess(PingMessage):
-    pass
+class OkMess(LeaderSuper):
+    def __init__(self, pid,num,ip,port):
+        super(OkMess, self).__init__(pid,num,ip,port,"LEADER")
+        self.type="OK"
 
-class AliveMessage(PingMessage):
-    pass
+
+class AliveMessage(LeaderSuper):
+    def __init__(self, pid,num,ip,port):
+        super(AliveMessage, self).__init__(pid,num,ip,port,"LEADER")
+        self.type="ALIVE"
 
 
 
@@ -53,7 +68,7 @@ class Leader(threading.Thread):
                  inQ = queue.Queue(),
                  pid = 0, myIP="127.0.0.1",
                  myPort=8888, otherPIDs = [], otherIPs = [],
-                 timeout=10,tickTime=1, **kwargs):
+                 timeout=1,tickTime=1, **kwargs):
         super().__init__()
 
         self.s = "DOWN"
@@ -68,14 +83,14 @@ class Leader(threading.Thread):
         self.otherPIDs = otherPIDs
         self.PPIDs = {}
         i = 0
-        for pid in otherIPs:
+        for pid in otherPIDs:
             self.PPIDs[str(pid)] = otherIPs[i]
             i += 1
 
         self.outQ = outQ
         self.inQ = inQ
         self.liveQs = queue.Queue()
-        self.pid = pid
+        self.pid = int(pid)
         self.daemon = True
         self.inMessages = []
         self.myIP = myIP
@@ -125,19 +140,21 @@ class Leader(threading.Thread):
 
     def ping_leader(self):
         """periodically checks on the leader"""
-        if not self.isCurrentLeader:
-            pMessage = self.pngMess #PingMessage(self.pid,self.pid,self.myIP,self.myPort)
-            self.outQ.put((pickle.dumps(pMessage),self.clIP))
-        time.sleep(self.timeout)
+        #if not self.isCurrentLeader:
+        pMessage = self.pngMess #PingMessage(self.pid,self.pid,self.myIP,self.myPort)
+        #    self.outQ.put((pickle.dumps(pMessage),self.clIP))
+        #time.sleep(self.timeout)
+        return self.tcpSendTh(pickle.dumps(pMessage))
 
     def send_ok(self,m):
         okm = self.okMess
-        self.outQ.put((pickle.dumps(okm),m.sourceIP))
+        #self.outQ.put((pickle.dumps(okm),m.sourceIP))
+        self.tcpSendTh((pickle.dumps(okm), m.sourceIP))
 
     def send_election_m(self):
         for pid in self.PPIDs:
-            if pid > self.pid:
-                self.outQ.put((pickle.dumps(self.electionMsg),self.PPIDs[pid]))
+            if int(pid) > int(self.pid):
+                self.tcpSendTh((pickle.dumps(self.okMess),self.PPIDs[pid]))
 
 
 
@@ -152,11 +169,58 @@ class Leader(threading.Thread):
 
     @property
     def higherPID_IPS(self):
-            higherPIDs = list(filter(lambda x: x > self.pid,self.otherPIDs))
-            rv = {}
-            for pid in higherPIDs:
-                rv[pid] = self.PPIDs[pid]
-            return rv
+        highers = {}
+        i = 0
+        for pid in self.otherPIDs:
+            if int(self.pid) < int(pid):
+                highers[str(pid)] = self.otherIPs[i]
+            i += 1
+
+
+            print("***** HIGHERS ARE ***" + str(highers))
+            return highers
+    def tcpSendTh(self, message):
+        import socket
+        import simplenetwork
+
+        msg = message
+        print("TCP Data sending is  " + str(msg))
+        if isinstance(msg,tuple):
+            destv = msg[1]
+            data = msg[0]
+
+            s = str(destv)
+            destv = s.rstrip("\\'")
+            destv = destv.replace("\\'","")
+            destv = destv.replace("\\\\","")
+
+            try:
+                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                sock.settimeout(2)
+
+                sock.connect((destv,simplenetwork.serverData.tcpPort))
+                sock.send(data)
+            except:
+                print(" error in single")
+                return False
+            finally:
+                sock.close()
+        else:
+                ##broadcast
+            for dest in simplenetwork.serverData.tcpDests:
+                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                try:
+                    sock.connect((simplenetwork.tcpDests[dest],simplenetwork.tcpPort))
+                    sock.send(msg)
+                except:
+                    print("error in bcast")
+                    return False
+                finally:
+                    sock.close()
+        return True
+
+
+
 
     def leader_running(self):
         """ once started up, ping the leader until he goes down, then nominate
@@ -165,24 +229,27 @@ class Leader(threading.Thread):
         set that to leader"""
 
         if not self.isCurrentLeader:
-            self.ping_leader() # blocks for the timeout time
-            self.data_handler_new() # handles all messages
-            gotPingResp = False
-            #check for ping response message from leader:
-            for m in self.aliveMessages:
-                if m.sourceIP == self.clIP:
-                    gotPingResp = True
-                    #for blocking style
-                
-        
-            self.aliveMessages = []
-            if not self.electionInProgress and not gotPingResp:
-                self.election_new()
+            print("Not the leader - ping send")
+            gotPingResp = self.ping_leader() # blocks for the timeout time
+            time.sleep(self.timeout)
+
+            if not gotPingResp:
+                print("No response detected from leader, starting election.")
+                if not self.electionInProgress and not gotPingResp:
+                    self.election_new()
+        else:
+            self.data_handler_new()
+            for m in self.okMessages:
+                self.send_ok(m)
+        self.okMessages = []
+
+
+
 
         self.data_handler_new() # handles all messages
 
         for m in self.electionMessages:
-            if m.pid > self.pid: #They are the leader
+            if int(m.pid) > self.pid: #They are the leader
                 self.clIP = m.sourceIP
                 self.isCurrentLeader = False
             else: # m.pid < self.pid:
@@ -191,7 +258,7 @@ class Leader(threading.Thread):
                 self.election_new()
 
         self.electionMessages = []
-                
+
         time.sleep(self.timeout)
     def election_new(self):
         self.elect()
@@ -204,6 +271,9 @@ class Leader(threading.Thread):
                 newLdr = None
                 if len(self.okMessages) > 0 :
                     self.electionInProgress = False
+                    time.sleep(self.timeout) ## Wait a bit, then we will get election results.
+                    self.data_handler_new()
+
                     break
                 else:
                     #we did not get an ok at all, we are now the leader:
@@ -215,14 +285,15 @@ class Leader(threading.Thread):
     def no_leader(self):
         for ip in self.otherIPs:
             pickledMess = pickle.dumps(self.ldrMesg)
-            self.outQ.put((pickledMess,ip))
+            if self.myIP is not ip:
+                self.outQ.put((pickledMess,ip))
         self.electionMessages =[]
 
     
                            
     def leader_startup(self):
 
-       self.isCurrentLeader = True
+       self.isCurrentLeader = False
        self.election_new()
 
 
@@ -236,15 +307,19 @@ class Leader(threading.Thread):
     ##
     def data_handler_new(self):
         time.sleep(self.timeout)
+        while self.inQ.qsize() > 0:
+            self.inMessages.append(pickle.loads(self.inQ.get()))
         for m in self.inMessages:
-            if isinstance(m,PingMessage):
+            if m.type == "PING":
                 self.queryMessages.append(m)
-            elif isinstance(m,OkMess):
+            elif m.type == "OK":
                 self.okMessages.append(m)
-            elif isinstance(m,LeaderMessage):
+            elif m.type == "LEADER":
                 self.electionMessages.append(m)
-            elif isinstance(m,AliveMessage):
+            elif m.type == "ALIVE":
                 self.aliveMessages.append(m)
+            else:
+                print("DATA HANDLER GOT INVALID MSG")
 
 
 
@@ -373,30 +448,14 @@ class Leader(threading.Thread):
         self._start_election()
     def run(self):
         print("Leader starting!!!")
-        time.sleep(30)
+        time.sleep(10)
         self.election_new()
         while (self.running):
             self.leader_running()
         #self.live = threading.Timer(1,self.ttime)
         #self.live.start()
-        self.elect()
-        while(True):
-            time.sleep(self.tickTime)
-            if self.running:
-                self.ttime()
-                self.checkData()
-                self.dataHandler()
-                if self.liveTimeoutCheck() :
-                    if self.electTimer is None:
-                        self.elect()
-                    else:
-                        print("t174 - timer called when it exists?")
-                        self.electTimer.cancel()
-                        self.elect()
-
-            else:
-                if self.live is not None:
-                    self.live.cancel()
+        
+        
 
 
 
