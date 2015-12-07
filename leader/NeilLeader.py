@@ -21,6 +21,7 @@ class Representative(threading.Thread):
         self.otherIPs = otherIPs
         self.runningElectionAlready = False
         self.gotOK = False
+        self.gotLeader = False
 
 
 
@@ -35,6 +36,8 @@ class Representative(threading.Thread):
     def run(self):
         while True:
             time.sleep(5)
+            if self.gotLeader:
+                continue
             if self.runningElectionAlready == False:
                 if self.countMessagesOfType('ELECTION') > 0:
                     #YOU RECIEVED AN ELECTION MESSAGE
@@ -67,6 +70,7 @@ class Representative(threading.Thread):
                 time.sleep(5)
 
                 if self.countMessagesOfType('LEADER') > 0:
+                    self.gotLeader = True
                     leaderMessages = self.getMessagesOfType('LEADER')
 
                     theLeaderMess = leaderMessages[0]
