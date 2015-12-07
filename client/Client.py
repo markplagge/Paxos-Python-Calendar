@@ -54,15 +54,15 @@ class Client(threading.Thread):
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID,otherPIDs=pidList, otherIPs=nodeIPs, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
         # TESTING WITHOUT LEADER
-        # self.ldrObj.clIP = '52.91.20.235'
-        # if self.uID == 1:
-        #     self.ldrObj.isCurrentLeader = True
-        # else:
-        #     self.ldrObj.isCurrentLeader = False
+        self.ldrObj.clIP = '54.174.47.231'
+        if self.uID == 4:
+            self.ldrObj.isCurrentLeader = True
+        else:
+            self.ldrObj.isCurrentLeader = False
 
         ##Start up the leader:
         self.ldrObj.daemon = True
-        self.ldrObj.start()
+        # self.ldrObj.start()
         # self.ldrObj.clIP = '45.47.149.217'
 
         #Create your node's Proposer Process
