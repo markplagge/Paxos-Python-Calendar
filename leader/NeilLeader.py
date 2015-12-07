@@ -117,8 +117,26 @@ class Representative(threading.Thread):
             self.outQ.put((pickledMess,self.otherIPs[superiorNodePID]))
 
         #WAIT FOR OKAY FROM THEM
+
+
         print("Waiting for timeout")
-        time.sleep(self.timeout)
+        time.sleep(self.timeout/2)
+
+        if self.countMessagesOfType('ELECTION') > 0:
+            print("Recieved Election Messages")
+            #YOU RECIEVED AN ELECTION MESSAGE
+
+            #reply OK to him
+            electMessages = self.getMessagesOfType('ELECTION')
+
+            for mess in electMessages:
+                senderOfElect = mess.senderIP
+                print("Sending Okay to: %s"%senderOfElect)
+                okayMess = LeadMess('OK',self.myIP,senderOfElect)
+                pickledMess = okayMess.pickleMe()
+
+                self.outQ.put((pickledMess,senderOfElect))
+        time.sleep(self.timeout/2)
 
         #CHECK FOR OKAY
 
