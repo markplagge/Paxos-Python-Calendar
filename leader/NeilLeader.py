@@ -35,9 +35,17 @@ class Representative(threading.Thread):
 
     def run(self):
         while True:
-            time.sleep(5)
-            if self.gotLeader:
-                continue
+            if self.countMessagesOfType('LEADER') > 0:
+                self.gotLeader = True
+                leaderMessages = self.getMessagesOfType('LEADER')
+
+                theLeaderMess = leaderMessages[0]
+
+                self.curLeaderIP = theLeaderMess.senderIP
+                trash = self.getMessagesOfType('OK')
+                trash = self.getMessagesOfType('ELECTION')
+                self.runningElectionAlready = False
+
             if self.runningElectionAlready == False:
                 if self.countMessagesOfType('ELECTION') > 0:
                     #YOU RECIEVED AN ELECTION MESSAGE
@@ -54,7 +62,6 @@ class Representative(threading.Thread):
 
                         self.outQ.put((pickledMess,senderOfElect))
 
-                    time.sleep(5)
                     if self.pid < self.N:
                         self.election()
                     # else:
@@ -67,15 +74,16 @@ class Representative(threading.Thread):
                         #
                         #         self.outQ.put((pickledMess,self.otherIPs[i]))
 
-                time.sleep(5)
-
-                if self.countMessagesOfType('LEADER') > 0:
-                    self.gotLeader = True
-                    leaderMessages = self.getMessagesOfType('LEADER')
-
-                    theLeaderMess = leaderMessages[0]
-
-                    self.curLeaderIP = theLeaderMess.senderIP
+                #
+                # if self.countMessagesOfType('LEADER') > 0:
+                #     self.gotLeader = True
+                #     leaderMessages = self.getMessagesOfType('LEADER')
+                #
+                #     theLeaderMess = leaderMessages[0]
+                #
+                #     self.curLeaderIP = theLeaderMess.senderIP
+                #     trash = self.getMessagesOfType('OK')
+                #     trash = self.getMessagesOfType('ELECTION')
 
 
 
@@ -99,6 +107,7 @@ class Representative(threading.Thread):
 
         if self.countMessagesOfType('OK') > 0:
             okayMessages = self.getMessagesOfType('OK')
+            trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
             self.gotOK = True
             return
@@ -111,6 +120,8 @@ class Representative(threading.Thread):
                     pickledMess = leaderMess.pickleMe()
 
                     self.outQ.put((pickledMess,self.otherIPs[i]))
+
+            trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
 
             return
