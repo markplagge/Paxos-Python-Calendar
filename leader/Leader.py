@@ -13,28 +13,41 @@ import time
 # from twisted.trial import unittest
 
 class LeaderSuper(object):
-    def __init__(self, pid,num,ip,port):
+    def __init__(self, pid,num,ip,port,type):
         self.pid = pid
         self.reqNum = num
         self.sourceIP = ip
         self.sourcePort = port
+        self.type="SUPER"
+        
+        
 
     def __str__(self):
         return "Message from pid " + str(self.pid) + ", IP: " + str(self.sourceIP)
 
 class LeaderMessage(LeaderSuper):
-    pass
+    def __init__(self, pid,num,ip,port):
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+    
 
 
 class PingMessage(LeaderSuper):
+    def __init__(self, pid,num,ip,port):
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        self.type = "PING"
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
 
 class OkMess(PingMessage):
-    pass
+    def __init__(self, pid,num,ip,port):
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        self.type="OK"
+
 
 class AliveMessage(PingMessage):
-    pass
+    def __init__(self, pid,num,ip,port):
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        self.type="ALIVE"
 
 
 
@@ -133,12 +146,13 @@ class Leader(threading.Thread):
 
     def send_ok(self,m):
         okm = self.okMess
-        self.outQ.put((pickle.dumps(okm),m.sourceIP))
+        #self.outQ.put((pickle.dumps(okm),m.sourceIP))
+        self.tcpSendTh((okm, m.sourceIP))
 
     def send_election_m(self):
         for pid in self.PPIDs:
             if pid > self.pid:
-                self.outQ.put((pickle.dumps(self.okMess),self.PPIDs[pid]))
+                self.tcpSendTh((pickle.dumps(self.okMess),self.PPIDs[pid]))
 
 
 
@@ -275,14 +289,16 @@ class Leader(threading.Thread):
         while self.inQ.qsize() > 0:
             self.inMessages.append(pickle.dumps(self.inQ.get()))
         for m in self.inMessages:
-            if isinstance(m,PingMessage):
+            if m.type == "PING":
                 self.queryMessages.append(m)
-            elif isinstance(m,OkMess):
+            elif m.type == "OK":
                 self.okMessages.append(m)
-            elif isinstance(m,LeaderMessage):
+            elif m.type == "LEADER":
                 self.electionMessages.append(m)
-            elif isinstance(m,AliveMessage):
+            elif m.type == "ALIVE":
                 self.aliveMessages.append(m)
+            else:
+                print("DATA HANDLER GOT INVALID MSG")
 
 
 
@@ -411,7 +427,7 @@ class Leader(threading.Thread):
         self._start_election()
     def run(self):
         print("Leader starting!!!")
-        time.sleep(30)
+        time.sleep(10)
         self.election_new()
         while (self.running):
             self.leader_running()
