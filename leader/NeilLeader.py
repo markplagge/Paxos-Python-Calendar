@@ -19,6 +19,7 @@ class Representative(threading.Thread):
         self.outQ = outQ
         self.otherPIDs = otherPIDs
         self.otherIPs = otherIPs
+        self.runningElectionAlready = False
 
 
 
@@ -33,42 +34,42 @@ class Representative(threading.Thread):
     def run(self):
         while True:
             time.sleep(5)
+            if self.runningElectionAlready == False:
+                if self.countMessagesOfType('ELECTION') > 0:
+                    #YOU RECIEVED AN ELECTION MESSAGE
+        
+                    #reply OK to him
 
-            if self.countMessagesOfType('ELECTION') > 0:
-                #YOU RECIEVED AN ELECTION MESSAGE
+                    electMessages = self.getMessagesOfType('ELECTION')
 
-                #reply OK to him
+                    for mess in electMessages:
+                        senderOfElect = mess.senderIP
 
-                electMessages = self.getMessagesOfType('ELECTION')
+                        okayMess = LeadMess('OK',self.myIP,senderOfElect)
+                        pickledMess = okayMess.pickleMe()
 
-                for mess in electMessages:
-                    senderOfElect = mess.senderIP
+                        self.outQ.put((pickledMess,senderOfElect))
 
-                    okayMess = LeadMess('OK',self.myIP,senderOfElect)
-                    pickledMess = okayMess.pickleMe()
+                    if self.pid < self.N-1:
+                        self.election()
+                    else:
+                        #I AM THE LEADER BY DEFAULT BEING THE HIGHEST NUMBER NODE
+                        self.iAmLeader = True
+                        for i in range(0,self.N):
+                            if i != self.pid:
+                                leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
+                                pickledMess = leaderMess.pickleMe()
 
-                    self.outQ.put((pickledMess,senderOfElect))
+                                self.outQ.put((pickledMess,self.otherIPs[i]))
 
-                if self.pid < self.N-1:
-                    self.election()
-                else:
-                    #I AM THE LEADER BY DEFAULT BEING THE HIGHEST NUMBER NODE
-                    self.iAmLeader = True
-                    for i in range(0,self.N):
-                        if i != self.pid:
-                            leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
-                            pickledMess = leaderMess.pickleMe()
+                time.sleep(5)
 
-                            self.outQ.put((pickledMess,self.otherIPs[i]))
+                if self.countMessagesOfType('LEADER') > 0:
+                    leaderMessages = self.getMessagesOfType('LEADER')
 
-            time.sleep(5)
+                    theLeaderMess = leaderMessages[0]
 
-            if self.countMessagesOfType('LEADER') > 0:
-                leaderMessages = self.getMessagesOfType('LEADER')
-
-                theLeaderMess = leaderMessages[0]
-
-                self.curLeaderIP = theLeaderMess.senderIP
+                    self.curLeaderIP = theLeaderMess.senderIP
 
 
 
@@ -77,7 +78,7 @@ class Representative(threading.Thread):
 
 
     def election(self):
-
+        self.runningElectionAlready = True
         #I need to send an elect message to all nodes above me
         for superiorNodePID in self.nodesHigherThanMe:
             electMess = LeadMess('ELECTION',self.myIP,self.otherIPs[superiorNodePID])
@@ -92,6 +93,7 @@ class Representative(threading.Thread):
 
         if self.countMessagesOfType('OK') > 0:
             okayMessages = self.getMessagesOfType('OK')
+            self.runningElectionAlready = False
             return
         else:
             self.iAmLeader = True
@@ -102,6 +104,7 @@ class Representative(threading.Thread):
                     pickledMess = leaderMess.pickleMe()
 
                     self.outQ.put((pickledMess,self.otherIPs[i]))
+            self.runningElectionAlready = False
 
             return
 
