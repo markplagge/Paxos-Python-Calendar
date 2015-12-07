@@ -130,8 +130,8 @@ def main():
     loop.close()
 ##TCP Clients (send data):
 def lostTCPConnection(data):
-    print("A TCP SEND ERROR HAS OCCURED")
-    sq.outTCP.put(data)
+    print("A TCP SEND ERROR HAS OCCURED: Node failure detection")
+    # sq.outTCP.put(data)
     
 def tcpSendTh():
     while True:
