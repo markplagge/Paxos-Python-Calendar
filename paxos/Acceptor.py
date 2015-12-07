@@ -268,7 +268,7 @@ class Learner(object):
         self.values = []
         self.pid = pid
         self.fn = str(pid) + persistantFN
-        self.ccal = None
+        self.ccal = UserCal.Calendar(username=self.pid)
         self.ccalVersion = None
 
         if os.path.isfile(self.fn):

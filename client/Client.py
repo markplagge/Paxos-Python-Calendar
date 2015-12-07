@@ -53,7 +53,7 @@ class Client(threading.Thread):
         #Create your node's Leader Process
         self.ldrObj = leader.Leader.Leader(outQ=self.outTCP,inQ=self.inTCP,pid=self.uID,otherPIDs=pidList, otherIPs=nodeIPs, myIP=simplenetwork.serverData.tcpDests[str(pID)])
 
-        #TESTING WITHOUT LEADER
+        # TESTING WITHOUT LEADER
         # self.ldrObj.clIP = '52.91.20.235'
         # if self.uID == 1:
         #     self.ldrObj.isCurrentLeader = True
@@ -106,8 +106,8 @@ class Client(threading.Thread):
 
             if choice == 1: #Print the events in the calendar
                 print('This calendar has the following events in it:')
-
                 self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+
 
                 numEvents = len(self.locCalendar.cal)
 
@@ -116,11 +116,11 @@ class Client(threading.Thread):
                 print('------------\n\n')
 
             elif choice == 2: #Add event to calendar
-                newEvent = addEventParsing(self)
+                newEvent = addEventParsing(self,test=False)
 
-                (succ, _) = self.locCalendar.addEntry(newEvent)
+                (fail, _) = self.locCalendar.addEntry(newEvent)
 
-                if succ:
+                if not fail:
                     #Create REQUEST message, send it to the node's proposer
                     rqstMess = NetMess(messType= "REQUEST", accVal=self.locCalendar)
 
@@ -183,10 +183,14 @@ class Client(threading.Thread):
                 responseReceived = True
                 response = self.propToClientQ.get()
 
-                if response[1] == None:
-                    self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+                # if response[1] == None:
+                #     # self.locCalendar = pCalendar.UserCal.Calendar(username=self.uID)
+                #     self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
+                #
+                #
+                # if response[0] == True: #SUCCESS!!!
+                #     # self.locCalendar = response[1]
+                #     self.locCalendar = copy.deepcopy(self.acceptObj.learner.ccal)
 
-                if response[0] == True: #SUCCESS!!!
-                    self.locCalendar = response[1]
             ct += 1
             time.sleep(1)

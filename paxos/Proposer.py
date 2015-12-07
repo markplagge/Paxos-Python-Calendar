@@ -43,7 +43,7 @@ class Proposer(threading.Thread):
                 #2. If we have a request from a client, generate a proposal, and send it to leader
             if self.fromClientQueue.qsize() > 0:
                 m = self.chooseNewPropNum(self.lastm)
-                print("Proposer: Got request from client, forwarding to leader")
+                print("Proposer: Got request from client, forwarding to leader: PROPOSAL(%i)"%m)
                 proposalM = MessDef.NetMess(messType="PROPOSAL", recipient=self.ldr.clIP, sender = self.ldr.myIP,
                                         m=m, accNum=-1, accVal=self.fromClientQueue.get().accVal)
                 self.addToOutQ((proposalM,self.ldr.clIP))
@@ -66,7 +66,7 @@ class Proposer(threading.Thread):
                     accNum = None
                     accVal = self.lastCommittedVal
 
-                print("Head Proposer: Sending Result to requested proposer")
+                print("Head Proposer: Sending Result to requested proposer: RESULT(%i,%s)"%(self.current_proposal_message.m,type(accVal)))
                 #5. Return proposal results to the requesting proposer
                 resultMessage = MessDef.NetMess(messType="RESULT", recipient=self.current_proposal_message.sender,
                                                 sender=self.ldr.myIP, m = self.current_proposal_message.m, accNum = accNum, accVal=accVal, success= success)
@@ -76,6 +76,7 @@ class Proposer(threading.Thread):
 
             curResultMessage = self.getMessageOfType("RESULT")
             if curResultMessage is not None:
+                self.lastm = curResultMessage.m
                 success = curResultMessage.success
                 accVal = curResultMessage.accVal
 
@@ -167,7 +168,8 @@ class Proposer(threading.Thread):
 
     def execSynod(self):
 
-        nextm = self.chooseNewPropNum(self.lastm)
+        # nextm = self.chooseNewPropNum(self.lastm)
+        nextm = self.current_proposal_message.m
 
 
         #Send prepare message with nextm to all other nodes' acceptors
@@ -202,6 +204,8 @@ class Proposer(threading.Thread):
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            self.lastm = nextm
+
             # retMajFail = True
             return retAccNum, retAccVal, retSuccess
 
@@ -255,6 +259,8 @@ class Proposer(threading.Thread):
             retAccNum= None
             retAccVal= self.lastCommittedVal
             retSuccess= False
+            self.lastm = nextm
+
             # retMajFail= True
             return retAccNum, retAccVal, retSuccess
 
