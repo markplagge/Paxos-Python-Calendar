@@ -59,25 +59,24 @@ class Representative(threading.Thread):
                 trash = self.getMessagesOfType('ELECTION')
                 self.runningElectionAlready = False
 
-            if self.runningElectionAlready == False:
-                if self.countMessagesOfType('ELECTION') > 0:
-                    print("Recieved Election Messages")
-                    #YOU RECIEVED AN ELECTION MESSAGE
 
-                    #reply OK to him
+            if self.countMessagesOfType('ELECTION') > 0:
+                print("Recieved Election Messages")
+                #YOU RECIEVED AN ELECTION MESSAGE
 
-                    electMessages = self.getMessagesOfType('ELECTION')
+                #reply OK to him
+                electMessages = self.getMessagesOfType('ELECTION')
 
-                    for mess in electMessages:
-                        senderOfElect = mess.senderIP
-                        print("Sending Okay to: %s"%senderOfElect)
-                        okayMess = LeadMess('OK',self.myIP,senderOfElect)
-                        pickledMess = okayMess.pickleMe()
+                for mess in electMessages:
+                    senderOfElect = mess.senderIP
+                    print("Sending Okay to: %s"%senderOfElect)
+                    okayMess = LeadMess('OK',self.myIP,senderOfElect)
+                    pickledMess = okayMess.pickleMe()
 
-                        self.outQ.put((pickledMess,senderOfElect))
+                    self.outQ.put((pickledMess,senderOfElect))
 
-                    if self.pid < self.N:
-                        self.election()
+                if not self.runningElectionAlready:
+                    self.election()
                     # else:
                         # #I AM THE LEADER BY DEFAULT BEING THE HIGHEST NUMBER NODE
                         # self.iAmLeader = True
