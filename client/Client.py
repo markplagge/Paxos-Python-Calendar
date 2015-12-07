@@ -42,13 +42,13 @@ class Client(threading.Thread):
 
         pidDict = simplenetwork.serverData.tcpDests
 
-        pidList = []
-        for key in pidDict:
-            pidList.append(key)
+        pidList = range(0,N)
+
 
         nodeIPs = []
-        for key in pidDict:
-            nodeIPs.append(pidDict[key])
+        for id in pidList:
+            nodeIPs.append(pidDict[id])
+
 
 
         #Create your node's Leader Process
