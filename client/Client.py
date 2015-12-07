@@ -201,3 +201,7 @@ class Client(threading.Thread):
 
             ct += 1
             time.sleep(1)
+
+        if responseReceived == False:
+            #Lost connection with leader, initiate election
+            self.ldrObj.election()

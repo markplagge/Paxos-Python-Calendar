@@ -37,6 +37,7 @@ class Representative(threading.Thread):
     def run(self):
         while True:
             if self.countMessagesOfType('LEADER') > 0:
+                print("Recieved Leader Messages, waiting for stability...")
                 time.sleep(10)
                 self.gotLeader = True
                 leaderMessages = self.getMessagesOfType('LEADER')
@@ -60,6 +61,7 @@ class Representative(threading.Thread):
 
             if self.runningElectionAlready == False:
                 if self.countMessagesOfType('ELECTION') > 0:
+                    print("Recieved Election Messages")
                     #YOU RECIEVED AN ELECTION MESSAGE
 
                     #reply OK to him
@@ -68,7 +70,7 @@ class Representative(threading.Thread):
 
                     for mess in electMessages:
                         senderOfElect = mess.senderIP
-
+                        print("Sending Okay to: %s"%senderOfElect)
                         okayMess = LeadMess('OK',self.myIP,senderOfElect)
                         pickledMess = okayMess.pickleMe()
 
@@ -104,26 +106,32 @@ class Representative(threading.Thread):
 
 
     def election(self):
+        print("Starting election!")
         self.runningElectionAlready = True
+        self.gotOK = False
         #I need to send an elect message to all nodes above me
         for superiorNodePID in self.nodesHigherThanMe:
+            print("Sending election to: %i"%superiorNodePID)
             electMess = LeadMess('ELECTION',self.myIP,self.otherIPs[superiorNodePID])
             pickledMess = electMess.pickleMe()
 
             self.outQ.put((pickledMess,self.otherIPs[superiorNodePID]))
 
         #WAIT FOR OKAY FROM THEM
+        print("Waiting for timeout")
         time.sleep(self.timeout)
 
         #CHECK FOR OKAY
 
         if self.countMessagesOfType('OK') > 0:
+            print("Got okay back, settling down.")
             okayMessages = self.getMessagesOfType('OK')
             trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
             self.gotOK = True
             return
         else:
+            print("No okays, I think I might be the leader")
             self.iAmLeader = True
 
             #YOU ARE THE LEADER
