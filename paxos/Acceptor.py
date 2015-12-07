@@ -170,6 +170,7 @@ class Acceptor(threading.Thread):
 
     def receiveCommit(self, message):
         response = self.learner.gotCommit(message)
+        self.acceptedV = None
 
         #self.learner.update(message.accVal, self.acceptedN)
         # self.outQ.put((response[0].pickleMe(),response[1])) #destroys the message
