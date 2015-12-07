@@ -36,7 +36,7 @@ class Acceptor(threading.Thread):
         self.acceptedN=0
         self.acceptedV=None
         self.ldr = ldr
-
+        self.myIP = thisIP
         # self.accNum = 0
 
         if ldr is None:
