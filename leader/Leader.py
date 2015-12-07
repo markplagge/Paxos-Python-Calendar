@@ -138,7 +138,7 @@ class Leader(threading.Thread):
     def send_election_m(self):
         for pid in self.PPIDs:
             if pid > self.pid:
-                self.outQ.put((pickle.dumps(self.electionMsg),self.PPIDs[pid]))
+                self.outQ.put((pickle.dumps(self.okMess),self.PPIDs[pid]))
 
 
 
@@ -256,7 +256,7 @@ class Leader(threading.Thread):
                            
     def leader_startup(self):
 
-       self.isCurrentLeader = True
+       self.isCurrentLeader = False
        self.election_new()
 
 
@@ -270,6 +270,8 @@ class Leader(threading.Thread):
     ##
     def data_handler_new(self):
         time.sleep(self.timeout)
+        while self.inQ.qsize() > 0:
+            self.inMessages.append(pickle.dumps(inQ.get())
         for m in self.inMessages:
             if isinstance(m,PingMessage):
                 self.queryMessages.append(m)
