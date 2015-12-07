@@ -17,3 +17,4 @@ class Representative(threading.Thread):
 
 
     def election(self):
+        pass
