@@ -37,6 +37,7 @@ class Representative(threading.Thread):
     def run(self):
         while True:
             if self.countMessagesOfType('LEADER') > 0:
+                time.sleep(10)
                 self.gotLeader = True
                 leaderMessages = self.getMessagesOfType('LEADER')
 

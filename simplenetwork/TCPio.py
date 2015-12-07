@@ -30,7 +30,7 @@ class thTCPServerHandler(socketserver.BaseRequestHandler):
         data = self.request.recv(5000)
         cur_thread = threading.current_thread()
         serverData.mainServerQueue.inTCP.put(data)
-        print("TCP Rcvd data: " + str(data))
+        # print("TCP Rcvd data: " + str(data))
 class thTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
@@ -137,7 +137,7 @@ def tcpSendTh():
     while True:
         if(sq.outTCP.qsize() > 0):
             msg = sq.outTCP.get()
-            print("TCP Data sending is  " + str(msg))
+            # print("TCP Data sending is  " + str(msg))
             if isinstance(msg,tuple):
                 dest = msg[1]
                 data = msg[0]
