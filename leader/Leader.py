@@ -186,11 +186,19 @@ class Leader(threading.Thread):
         msg = message
         print("TCP Data sending is  " + str(msg))
         if isinstance(msg,tuple):
-            dest = msg[1]
+            destv = msg[1]
             data = msg[0]
+
+            s = str(destv)
+            destv = s.rstrip("\\'")
+            destv = destv.replace("\\'","")
+            destv = destv.replace("\\\\","")
+
             try:
                 sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                sock.connect((dest,simplenetwork.serverData.tcpPort))
+                sock.settimeout(2)
+
+                sock.connect((destv,simplenetwork.serverData.tcpPort))
                 sock.send(data)
             except:
                 print(" error in single")
@@ -229,6 +237,11 @@ class Leader(threading.Thread):
                 print("No response detected from leader, starting election.")
                 if not self.electionInProgress and not gotPingResp:
                     self.election_new()
+        else:
+            self.data_handler_new()
+            for m in self.okMessages:
+                self.send_ok(m)
+        self.okMessages = []
 
 
 
@@ -245,7 +258,7 @@ class Leader(threading.Thread):
                 self.election_new()
 
         self.electionMessages = []
-                
+
         time.sleep(self.timeout)
     def election_new(self):
         self.elect()
