@@ -32,6 +32,7 @@ class Representative(threading.Thread):
 
     def run(self):
         while True:
+            time.sleep(5)
 
             if self.countMessagesOfType('ELECTION') > 0:
                 #YOU RECIEVED AN ELECTION MESSAGE
@@ -60,6 +61,7 @@ class Representative(threading.Thread):
 
                             self.outQ.put((pickledMess,self.otherIPs[i]))
 
+            time.sleep(5)
 
             if self.countMessagesOfType('LEADER') > 0:
                 leaderMessages = self.getMessagesOfType('LEADER')
