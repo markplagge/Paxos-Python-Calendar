@@ -271,7 +271,7 @@ class Leader(threading.Thread):
     def data_handler_new(self):
         time.sleep(self.timeout)
         while self.inQ.qsize() > 0:
-            self.inMessages.append(pickle.dumps(inQ.get())
+            self.inMessages.append(pickle.dumps(inQ.get()))
         for m in self.inMessages:
             if isinstance(m,PingMessage):
                 self.queryMessages.append(m)
