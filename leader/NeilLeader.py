@@ -39,9 +39,19 @@ class Representative(threading.Thread):
                 self.gotLeader = True
                 leaderMessages = self.getMessagesOfType('LEADER')
 
-                theLeaderMess = leaderMessages[0]
+                maxLeaderMess = leaderMessages[0]
+                maxLeaderID = -1
+                for leaderMess in leaderMessages:
+                    if leaderMess.senderID > maxLeaderMess:
+                        maxLeaderMess = leaderMess
+                        maxLeaderID = leaderMess.senderID
+
+                theLeaderMess = maxLeaderMess
 
                 self.curLeaderIP = theLeaderMess.senderIP
+                print('Recieved Leader Message from max: %i'%theLeaderMess.senderID)
+                time.sleep(10)
+
                 trash = self.getMessagesOfType('OK')
                 trash = self.getMessagesOfType('ELECTION')
                 self.runningElectionAlready = False
