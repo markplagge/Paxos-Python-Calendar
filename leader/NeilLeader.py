@@ -7,7 +7,7 @@ import pickle
 class Representative(threading.Thread):
 
 
-    def __init__(self, pid=1, N=1,outQ = queue.Queue(), inQ = queue.Queue(), otherPIDs = [], otherIPs = [], curLeaderIP='127.0.0.1', myIP='127.0.0.1',timeout=5):
+    def __init__(self, pid=1, N=1,outQ = queue.Queue(), inQ = queue.Queue(), otherPIDs = [], otherIPs = [], curLeaderIP='127.0.0.1', myIP='127.0.0.1',timeout=10):
         super().__init__()
         self.pid = pid
         self.N = N
@@ -22,6 +22,7 @@ class Representative(threading.Thread):
         self.runningElectionAlready = False
         self.gotOK = False
         self.gotLeader = False
+
 
 
 
@@ -48,7 +49,7 @@ class Representative(threading.Thread):
 
                 theLeaderMess = maxLeaderMess
 
-                self.curLeaderIP = theLeaderMess.senderIP
+                self.clIP = theLeaderMess.senderIP
                 print('Recieved Leader Message from max: %i'%theLeaderMess.senderID)
                 time.sleep(10)
 
@@ -125,13 +126,21 @@ class Representative(threading.Thread):
             self.iAmLeader = True
 
             #YOU ARE THE LEADER
-            for i in range(0,self.N):
-                if i != self.pid:
-                    leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
-                    pickledMess = leaderMess.pickleMe()
 
-                    self.outQ.put((pickledMess,self.otherIPs[i]))
+            leaderMess = LeadMess('LEADER',self.myIP,'everyone',senderID=self.pid)
+            pickledMess = leaderMess.pickleMe()
 
+            self.outQ.put(leaderMess)
+
+            #
+            # for i in range(0,self.N):
+            #     if i != self.pid:
+            #         leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
+            #         pickledMess = leaderMess.pickleMe()
+            #
+            #         self.outQ.put((pickledMess,self.otherIPs[i]))
+            self.clIP = self.myIP
+            
             time.sleep(10)
             trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
