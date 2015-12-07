@@ -11,7 +11,7 @@ class Representative(threading.Thread):
         super().__init__()
         self.pid = pid
         self.N = N
-        self.curLeaderIP = otherIPs[N-1]
+        self.clIP = otherIPs[N-1]
         self.myIP = myIP
         self.iAmLeader = False
         self.timeout = timeout
