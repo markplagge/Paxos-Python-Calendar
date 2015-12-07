@@ -127,20 +127,19 @@ class Representative(threading.Thread):
 
             #YOU ARE THE LEADER
 
-            leaderMess = LeadMess('LEADER',self.myIP,'everyone',senderID=self.pid)
-            pickledMess = leaderMess.pickleMe()
-
-            self.outQ.put(leaderMess)
-
+            # leaderMess = LeadMess('LEADER',self.myIP,'everyone',senderID=self.pid)
+            # pickledMess = leaderMess.pickleMe()
             #
-            # for i in range(0,self.N):
-            #     if i != self.pid:
-            #         leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
-            #         pickledMess = leaderMess.pickleMe()
-            #
-            #         self.outQ.put((pickledMess,self.otherIPs[i]))
+            # self.outQ.put(leaderMess)
+
+
+            for i in range(0,int(self.N)):
+                leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
+                pickledMess = leaderMess.pickleMe()
+
+                self.outQ.put((pickledMess,self.otherIPs[i]))
             self.clIP = self.myIP
-            
+
             time.sleep(10)
             trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
