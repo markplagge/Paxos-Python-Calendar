@@ -47,7 +47,7 @@ class Client(threading.Thread):
 
         nodeIPs = []
         for id in pidList:
-            nodeIPs.append(pidDict[id])
+            nodeIPs.append(pidDict[str(id)])
 
 
 
