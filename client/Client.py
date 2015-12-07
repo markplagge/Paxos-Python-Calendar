@@ -66,10 +66,10 @@ class Client(threading.Thread):
         self.ldrObj.daemon = True
         self.ldrObj.start()
 
-        # if self.uID == 0:
-        #     print("Waiting for you to start up everyone for Leader Election Initialized")
-        #     time.sleep(30)
-        #     self.ldrObj.election()
+        if self.uID == 0:
+            print("Waiting for you to start up everyone for Leader Election Initialized")
+            time.sleep(30)
+            self.ldrObj.election()
         # self.ldrObj.clIP = '45.47.149.217'
 
         #Create your node's Proposer Process
