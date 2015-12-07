@@ -27,13 +27,13 @@ class LeaderSuper(object):
 
 class LeaderMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
-        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(LeaderSuper, self).__init__(pid,num,ip,port,"LEADER")
     
 
 
 class PingMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
-        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(LeaderSuper, self).__init__(pid,num,ip,port,"LEADER")
         self.type = "PING"
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
@@ -147,7 +147,7 @@ class Leader(threading.Thread):
     def send_ok(self,m):
         okm = self.okMess
         #self.outQ.put((pickle.dumps(okm),m.sourceIP))
-        self.tcpSendTh((okm, m.sourceIP))
+        self.tcpSendTh((pickle.dumps(okm), m.sourceIP))
 
     def send_election_m(self):
         for pid in self.PPIDs:
