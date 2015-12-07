@@ -40,13 +40,13 @@ class PingMessage(LeaderSuper):
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
 
-class OkMess(PingMessage):
+class OkMess(LeaderSuper):
     def __init__(self, pid,num,ip,port):
         super(OkMess, self).__init__(pid,num,ip,port,"LEADER")
         self.type="OK"
 
 
-class AliveMessage(PingMessage):
+class AliveMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
         super(AliveMessage, self).__init__(pid,num,ip,port,"LEADER")
         self.type="ALIVE"
