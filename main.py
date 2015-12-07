@@ -9,4 +9,5 @@ if __name__ == '__main__':
 
     theClient = client.Client.Client(pID=thisPID, N=nodes, hostFile='./hosts.info')
 
+    print('executing client')
     theClient.execClient()

@@ -39,17 +39,17 @@ class Acceptor(threading.Thread):
         self.myIP = thisIP
         # self.accNum = 0
 
-        if ldr is None:
-            self.myIP =  thisIP
-        else:
-            try:
-                assert(isinstance(ldr,leader.Leader.Leader) or
-                       isinstance(ldr,leader.Leader.LeaderAs))
-                self.myIP = self.ldr.myIP
-            except:
-                print("Acceptor error - no valid leader given, or no IP set.")
-                print("My IP is " + str(self.myIP) + ", LDR is " + str(ldr))
-                exit(-1)
+        # if ldr is None:
+        #     self.myIP =  thisIP
+        # else:
+        #     try:
+        #         assert(isinstance(ldr,leader.Leader.Leader) or
+        #                isinstance(ldr,leader.Leader.LeaderAs))
+        #         self.myIP = self.ldr.myIP
+        #     except:
+        #         print("Acceptor error - no valid leader given, or no IP set.")
+        #         print("My IP is " + str(self.myIP) + ", LDR is " + str(ldr))
+        #         exit(-1)
 
         self.learner = Learner(thisIP+thisPort)
 
