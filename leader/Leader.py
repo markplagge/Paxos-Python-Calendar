@@ -90,7 +90,7 @@ class Leader(threading.Thread):
         self.outQ = outQ
         self.inQ = inQ
         self.liveQs = queue.Queue()
-        self.pid = pid
+        self.pid = int(pid)
         self.daemon = True
         self.inMessages = []
         self.myIP = myIP
@@ -153,7 +153,7 @@ class Leader(threading.Thread):
 
     def send_election_m(self):
         for pid in self.PPIDs:
-            if pid > self.pid:
+            if int(pid) > int(self.pid):
                 self.tcpSendTh((pickle.dumps(self.okMess),self.PPIDs[pid]))
 
 
@@ -169,12 +169,16 @@ class Leader(threading.Thread):
 
     @property
     def higherPID_IPS(self):
-            higherPIDs = list(filter(lambda x: x > self.pid,self.otherPIDs))
-            rv = {}
-            for pid in higherPIDs:
-                rv[pid] = self.PPIDs[pid]
-            print("***** HIGHERS ARE ***" + str(rv))
-            return rv
+        highers = {}
+        i = 0
+        for pid in self.otherPIDs:
+            if int(self.pid) < int(pid):
+                highers[str(pid)] = self.otherIPs[i]
+            i += 1
+
+
+            print("***** HIGHERS ARE ***" + str(highers))
+            return highers
     def tcpSendTh(self, message):
         import socket
         import simplenetwork
@@ -232,7 +236,7 @@ class Leader(threading.Thread):
         self.data_handler_new() # handles all messages
 
         for m in self.electionMessages:
-            if m.pid > self.pid: #They are the leader
+            if int(m.pid) > self.pid: #They are the leader
                 self.clIP = m.sourceIP
                 self.isCurrentLeader = False
             else: # m.pid < self.pid:
