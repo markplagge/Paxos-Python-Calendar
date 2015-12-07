@@ -96,7 +96,7 @@ class Representative(threading.Thread):
             #YOU ARE THE LEADER
             for i in range(0,self.N):
                 if i != self.pid:
-                    leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderIP=self.pid)
+                    leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
                     pickledMess = leaderMess.pickleMe()
 
                     self.outQ.put((pickledMess,self.otherIPs[i]))
