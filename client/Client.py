@@ -65,8 +65,10 @@ class Client(threading.Thread):
         ##Start up the leader:
         self.ldrObj.daemon = True
         self.ldrObj.start()
-        
+
         if self.uID == 0:
+            print("Waiting for you to start up everyone for Leader Election Initialized")
+            time.sleep(30)
             self.ldrObj.election()
         # self.ldrObj.clIP = '45.47.149.217'
 
