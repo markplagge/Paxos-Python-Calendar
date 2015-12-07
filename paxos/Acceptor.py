@@ -33,9 +33,12 @@ class Acceptor(threading.Thread):
         self.ldr = ldr
         self.promiseN= -1
         self.promiseV= None
-        self.acceptedN=None
+        self.acceptedN=0
         self.acceptedV=None
         self.ldr = ldr
+
+        # self.accNum = 0
+
         if ldr is None:
             self.myIP =  thisIP
         else:
@@ -94,7 +97,7 @@ class Acceptor(threading.Thread):
         # except:
         #     pkl = None
         # return pkl
-        return self.promiseV
+        return self.acceptedV
 
     ### MESSAGE GENERATION ###
     def newPromise(self, opmsg):
@@ -104,7 +107,7 @@ class Acceptor(threading.Thread):
         pkl = self.serializedCal
 
         outMess = MSG(messType="PROMISE", recipient = opmsg.sender, sender = self.myIP,
-                      m=opmsg.accNum, accNum=self.promiseN, accVal=pkl)
+                        accNum=self.accNum, accVal=pkl)
 
         print("Acceptor: Sending Promise(%i, %s)"%(self.promiseN,type(pkl)))
 
@@ -143,11 +146,12 @@ class Acceptor(threading.Thread):
         #First, we assume that the proposal id is too large then smaller. dupes should fall through?
         m = int(message.m)
 
-        if(self.promiseN <= m ):
+        if(self.promiseN < m ):
             self.promiseN = m
             self.newPromise(message)
         else:
-            self.nackPromise(message)
+            # self.nackPromise(message)
+            pass
 
 
     def receiveAccept(self,message):
