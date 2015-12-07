@@ -7,7 +7,7 @@ import pickle
 class Representative(threading.Thread):
 
 
-    def __init__(self, pid=1, N=1,outQ = queue.Queue(), inQ = queue.Queue(), otherPIDs = [], otherIPs = [], curLeaderIP='127.0.0.1', myIP='127.0.0.1',timeout=10):
+    def __init__(self, pid=1, N=1,outQ = queue.Queue(), inQ = queue.Queue(), otherPIDs = [], otherIPs = [], curLeaderIP='127.0.0.1', myIP='127.0.0.1',timeout=5):
         super().__init__()
         self.pid = pid
         self.N = N
@@ -100,6 +100,8 @@ class Representative(threading.Thread):
                     pickledMess = leaderMess.pickleMe()
 
                     self.outQ.put((pickledMess,self.otherIPs[i]))
+
+            return
 
 
 
