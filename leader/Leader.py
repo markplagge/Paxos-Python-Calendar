@@ -68,7 +68,7 @@ class Leader(threading.Thread):
         self.otherPIDs = otherPIDs
         self.PPIDs = {}
         i = 0
-        for pid in otherIPs:
+        for pid in otherPIDs:
             self.PPIDs[str(pid)] = otherIPs[i]
             i += 1
 
@@ -125,10 +125,11 @@ class Leader(threading.Thread):
 
     def ping_leader(self):
         """periodically checks on the leader"""
-        if not self.isCurrentLeader:
-            pMessage = self.pngMess #PingMessage(self.pid,self.pid,self.myIP,self.myPort)
-            self.outQ.put((pickle.dumps(pMessage),self.clIP))
-        time.sleep(self.timeout)
+        #if not self.isCurrentLeader:
+        pMessage = self.pngMess #PingMessage(self.pid,self.pid,self.myIP,self.myPort)
+        #    self.outQ.put((pickle.dumps(pMessage),self.clIP))
+        #time.sleep(self.timeout)
+        return self.tcpSendTh(pMessage)
 
     def send_ok(self,m):
         okm = self.okMess
@@ -157,6 +158,40 @@ class Leader(threading.Thread):
             for pid in higherPIDs:
                 rv[pid] = self.PPIDs[pid]
             return rv
+    def tcpSendTh(self, message):
+        import socket
+        import simplenetwork
+
+        msg = message
+        print("TCP Data sending is  " + str(msg))
+        if isinstance(msg,tuple):
+            dest = msg[1]
+            data = msg[0]
+            try:
+                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                sock.connect((dest,simplenetwork.serverData.tcpPort))
+                sock.send(data)
+            except:
+                print(" error in single")
+                return False
+            finally:
+                sock.close()
+        else:
+                ##broadcast
+            for dest in simplenetwork.serverData.tcpDests:
+                sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                try:
+                    sock.connect((simplenetwork.tcpDests[dest],simplenetwork.tcpPort))
+                    sock.send(msg)
+                except:
+                    print("error in bcast")
+                    return False
+                finally:
+                    sock.close()
+        return True
+
+
+
 
     def leader_running(self):
         """ once started up, ping the leader until he goes down, then nominate
@@ -165,19 +200,17 @@ class Leader(threading.Thread):
         set that to leader"""
 
         if not self.isCurrentLeader:
-            self.ping_leader() # blocks for the timeout time
-            self.data_handler_new() # handles all messages
-            gotPingResp = False
-            #check for ping response message from leader:
-            for m in self.aliveMessages:
-                if m.sourceIP == self.clIP:
-                    gotPingResp = True
-                    #for blocking style
-                
-        
-            self.aliveMessages = []
-            if not self.electionInProgress and not gotPingResp:
-                self.election_new()
+            print("Not the leader - ping send")
+            gotPingResp = self.ping_leader() # blocks for the timeout time
+            time.sleep()
+
+            if not gotPingResp:
+                print("No response detected from leader, starting election.")
+                if not self.electionInProgress and not gotPingResp:
+                    self.election_new()
+
+
+
 
         self.data_handler_new() # handles all messages
 
@@ -204,6 +237,7 @@ class Leader(threading.Thread):
                 newLdr = None
                 if len(self.okMessages) > 0 :
                     self.electionInProgress = False
+                    time.sleep(self.timeout) ## Wait a bit, then we will get election results.
                     break
                 else:
                     #we did not get an ok at all, we are now the leader:
