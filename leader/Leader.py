@@ -27,26 +27,28 @@ class LeaderSuper(object):
 
 class LeaderMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
-        super(LeaderSuper, self).__init__(pid,num,ip,port,"LEADER")
+
+        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
     
 
 
 class PingMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
-        super(LeaderSuper, self).__init__(pid,num,ip,port,"LEADER")
-        self.type = "PING"
+
+        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
+        seLeaderSuperlf.type = "PING"
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
 
 class OkMess(PingMessage):
     def __init__(self, pid,num,ip,port):
-        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(OkMess, self).__init__(pid,num,ip,port,"LEADER")
         self.type="OK"
 
 
 class AliveMessage(PingMessage):
     def __init__(self, pid,num,ip,port):
-        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(AliveMessage, self).__init__(pid,num,ip,port,"LEADER")
         self.type="ALIVE"
 
 
