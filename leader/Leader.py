@@ -18,7 +18,7 @@ class LeaderSuper(object):
         self.reqNum = num
         self.sourceIP = ip
         self.sourcePort = port
-        self.type="SUPER"
+        self.type=type
         
         
 
@@ -40,13 +40,13 @@ class PingMessage(LeaderSuper):
 
 class OkMess(PingMessage):
     def __init__(self, pid,num,ip,port):
-        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
         self.type="OK"
 
 
 class AliveMessage(PingMessage):
     def __init__(self, pid,num,ip,port):
-        super(LeaderMessage, self).__init__(pid,num,ip,port,"LEADER")
+        super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
         self.type="ALIVE"
 
 
@@ -265,7 +265,8 @@ class Leader(threading.Thread):
     def no_leader(self):
         for ip in self.otherIPs:
             pickledMess = pickle.dumps(self.ldrMesg)
-            self.outQ.put((pickledMess,ip))
+            if self.myIP is not ip:
+                self.outQ.put((pickledMess,ip))
         self.electionMessages =[]
 
     
@@ -287,7 +288,7 @@ class Leader(threading.Thread):
     def data_handler_new(self):
         time.sleep(self.timeout)
         while self.inQ.qsize() > 0:
-            self.inMessages.append(pickle.dumps(self.inQ.get()))
+            self.inMessages.append(pickle.loads(self.inQ.get()))
         for m in self.inMessages:
             if m.type == "PING":
                 self.queryMessages.append(m)
