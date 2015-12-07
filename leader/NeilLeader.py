@@ -42,7 +42,7 @@ class Representative(threading.Thread):
                 maxLeaderMess = leaderMessages[0]
                 maxLeaderID = -1
                 for leaderMess in leaderMessages:
-                    if leaderMess.senderID > maxLeaderMess:
+                    if leaderMess.senderID > maxLeaderID:
                         maxLeaderMess = leaderMess
                         maxLeaderID = leaderMess.senderID
 
@@ -123,6 +123,7 @@ class Representative(threading.Thread):
             return
         else:
             self.iAmLeader = True
+
             #YOU ARE THE LEADER
             for i in range(0,self.N):
                 if i != self.pid:
@@ -131,6 +132,7 @@ class Representative(threading.Thread):
 
                     self.outQ.put((pickledMess,self.otherIPs[i]))
 
+            time.sleep(10)
             trash = self.getMessagesOfType('ELECTION')
             self.runningElectionAlready = False
 
