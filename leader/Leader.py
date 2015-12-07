@@ -53,7 +53,7 @@ class Leader(threading.Thread):
                  inQ = queue.Queue(),
                  pid = 0, myIP="127.0.0.1",
                  myPort=8888, otherPIDs = [], otherIPs = [],
-                 timeout=10,tickTime=1, **kwargs):
+                 timeout=1,tickTime=1, **kwargs):
         super().__init__()
 
         self.s = "DOWN"
@@ -238,6 +238,8 @@ class Leader(threading.Thread):
                 if len(self.okMessages) > 0 :
                     self.electionInProgress = False
                     time.sleep(self.timeout) ## Wait a bit, then we will get election results.
+                    self.data_handler_new()
+
                     break
                 else:
                     #we did not get an ok at all, we are now the leader:
@@ -415,24 +417,8 @@ class Leader(threading.Thread):
             self.leader_running()
         #self.live = threading.Timer(1,self.ttime)
         #self.live.start()
-        self.elect()
-        while(True):
-            time.sleep(self.tickTime)
-            if self.running:
-                self.ttime()
-                self.checkData()
-                self.dataHandler()
-                if self.liveTimeoutCheck() :
-                    if self.electTimer is None:
-                        self.elect()
-                    else:
-                        print("t174 - timer called when it exists?")
-                        self.electTimer.cancel()
-                        self.elect()
-
-            else:
-                if self.live is not None:
-                    self.live.cancel()
+        
+        
 
 
 
