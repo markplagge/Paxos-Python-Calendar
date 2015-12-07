@@ -110,9 +110,9 @@ class Representative(threading.Thread):
         mx = []
         while(self.inQ.qsize() > 0):
             theMess = self.inQ.get()
-            if not isinstance(theMess,LeadMess):
-                theMess = pickle.dumps(theMess)
-                print(theMess)
+            if isinstance(theMess,bytes):
+                theMess = pickle.loads(theMess)
+                # print(theMess)
             mx.append(theMess)
         rv = filter(lambda x: x.messType == messageType,mx)
         mx = filter(lambda x: x.messType != messageType,mx)
