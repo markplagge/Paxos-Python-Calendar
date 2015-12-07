@@ -107,7 +107,7 @@ class Acceptor(threading.Thread):
         pkl = self.serializedCal
 
         outMess = MSG(messType="PROMISE", recipient = opmsg.sender, sender = self.myIP,
-                        accNum=self.accNum, accVal=pkl)
+                        accNum=self.acceptedN, accVal=pkl)
 
         print("Acceptor: Sending Promise(%i, %s)"%(self.promiseN,type(pkl)))
 
