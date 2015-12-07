@@ -144,7 +144,7 @@ class Leader(threading.Thread):
         pMessage = self.pngMess #PingMessage(self.pid,self.pid,self.myIP,self.myPort)
         #    self.outQ.put((pickle.dumps(pMessage),self.clIP))
         #time.sleep(self.timeout)
-        return self.tcpSendTh(pMessage)
+        return self.tcpSendTh(pickle.dumps(pMessage))
 
     def send_ok(self,m):
         okm = self.okMess
@@ -219,7 +219,7 @@ class Leader(threading.Thread):
         if not self.isCurrentLeader:
             print("Not the leader - ping send")
             gotPingResp = self.ping_leader() # blocks for the timeout time
-            time.sleep()
+            time.sleep(self.timeout)
 
             if not gotPingResp:
                 print("No response detected from leader, starting election.")
