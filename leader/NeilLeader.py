@@ -20,6 +20,7 @@ class Representative(threading.Thread):
         self.otherPIDs = otherPIDs
         self.otherIPs = otherIPs
         self.runningElectionAlready = False
+        self.gotOK = False
 
 
 
@@ -37,7 +38,7 @@ class Representative(threading.Thread):
             if self.runningElectionAlready == False:
                 if self.countMessagesOfType('ELECTION') > 0:
                     #YOU RECIEVED AN ELECTION MESSAGE
-        
+
                     #reply OK to him
 
                     electMessages = self.getMessagesOfType('ELECTION')
@@ -50,17 +51,18 @@ class Representative(threading.Thread):
 
                         self.outQ.put((pickledMess,senderOfElect))
 
-                    if self.pid < self.N-1:
+                    time.sleep(5)
+                    if self.pid < self.N:
                         self.election()
-                    else:
-                        #I AM THE LEADER BY DEFAULT BEING THE HIGHEST NUMBER NODE
-                        self.iAmLeader = True
-                        for i in range(0,self.N):
-                            if i != self.pid:
-                                leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
-                                pickledMess = leaderMess.pickleMe()
-
-                                self.outQ.put((pickledMess,self.otherIPs[i]))
+                    # else:
+                        # #I AM THE LEADER BY DEFAULT BEING THE HIGHEST NUMBER NODE
+                        # self.iAmLeader = True
+                        # for i in range(0,self.N):
+                        #     if i != self.pid:
+                        #         leaderMess = LeadMess('LEADER',self.myIP,self.otherIPs[i],senderID=self.pid)
+                        #         pickledMess = leaderMess.pickleMe()
+                        #
+                        #         self.outQ.put((pickledMess,self.otherIPs[i]))
 
                 time.sleep(5)
 
@@ -94,6 +96,7 @@ class Representative(threading.Thread):
         if self.countMessagesOfType('OK') > 0:
             okayMessages = self.getMessagesOfType('OK')
             self.runningElectionAlready = False
+            self.gotOK = True
             return
         else:
             self.iAmLeader = True
