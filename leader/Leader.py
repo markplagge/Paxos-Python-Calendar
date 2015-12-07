@@ -36,7 +36,7 @@ class PingMessage(LeaderSuper):
     def __init__(self, pid,num,ip,port):
 
         super(PingMessage, self).__init__(pid,num,ip,port,"LEADER")
-        seLeaderSuperlf.type = "PING"
+        self.type = "PING"
     def __str__(self):
         return "Ping Msg from " + str(self.pid)
 
@@ -173,6 +173,7 @@ class Leader(threading.Thread):
             rv = {}
             for pid in higherPIDs:
                 rv[pid] = self.PPIDs[pid]
+            print("***** HIGHERS ARE ***" + str(rv))
             return rv
     def tcpSendTh(self, message):
         import socket
